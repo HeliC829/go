@@ -85,6 +85,8 @@ func rewriteValueMIPS(v *Value) bool {
 		return rewriteValueMIPS_OpAvg32u(v)
 	case OpBitLen32:
 		return rewriteValueMIPS_OpBitLen32(v)
+	case OpBswap16:
+		return rewriteValueMIPS_OpBswap16(v)
 	case OpClosureCall:
 		v.Op = OpMIPSCALLclosure
 		return true
@@ -812,6 +814,24 @@ func rewriteValueMIPS_OpBitLen32(v *Value) bool {
 		v.AddArg2(v0, v1)
 		return true
 	}
+}
+func rewriteValueMIPS_OpBswap16(v *Value) bool {
+	v_0 := v.Args[0]
+	// match: (Bswap16 <t> x)
+	// cond: buildcfg.GOMIPS.ISALevel >= 2
+	// result: (WSBH <t> x)
+	for {
+		t := v.Type
+		x := v_0
+		if !(buildcfg.GOMIPS.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPSWSBH)
+		v.Type = t
+		v.AddArg(x)
+		return true
+	}
+	return false
 }
 func rewriteValueMIPS_OpCom16(v *Value) bool {
 	v_0 := v.Args[0]
