@@ -27,6 +27,7 @@ var Anames = []string{
 	"BREAK",
 	"CLO",
 	"CLZ",
+	"CLZV",
 	"CMOVF",
 	"CMOVN",
 	"CMOVT",
