@@ -156,6 +156,13 @@
 (Bswap32 <t> x) && buildcfg.GOMIPS64.ISALevel >= 2 => (SRLVconst (DSBH <t> (DSHD <t> (ZeroExt32to64 x))) [32])
 (Bswap16 <t> x) && buildcfg.GOMIPS64.ISALevel >= 2 => (WSBH <t> x)
 
+// count trailing zero
+// 64/32 - CLZ(x&-x - 1)
+(Ctz(64|32)NonZero x) && buildcfg.GOMIPS64.ISALevel >= 1 => (Ctz(64|32) x)
+
+(Ctz64 <t> x) && buildcfg.GOMIPS64.ISALevel >= 1 => (SUBV (MOVVconst [64]) (CLZV <t> (SUBVconst <t> [1] (AND <t> x (NEGV <t> x)))))
+(Ctz32 <t> x) && buildcfg.GOMIPS64.ISALevel >= 1 => (SUBV (MOVVconst [32]) (CLZ  <t> (SUBVconst <t> [1] (AND <t> x (NEGV <t> x)))))
+
 // truncations
 // Because we ignore high parts of registers, truncates are just copies.
 (Trunc16to8 ...) => (Copy ...)
