@@ -149,6 +149,10 @@
 
 (Slicemask <t> x) => (SRAVconst (NEGV <t> x) [63])
 
+(Bswap64 <t> x) && buildcfg.GOMIPS64.ISALevel >= 2 => (DSBH (DSHD <t> x))
+(Bswap32 <t> x) && buildcfg.GOMIPS64.ISALevel >= 2 => (SRLVconst (DSBH <t> (DSHD <t> (ZeroExt32to64 x))) [32])
+(Bswap16 <t> x) && buildcfg.GOMIPS64.ISALevel >= 2 => (WSBH <t> x)
+
 // truncations
 // Because we ignore high parts of registers, truncates are just copies.
 (Trunc16to8 ...) => (Copy ...)

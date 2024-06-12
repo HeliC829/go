@@ -4260,7 +4260,17 @@ func InitTables() {
 		// make it worthwhile as an intrinsic
 		brev_arch = append(brev_arch, sys.PPC64)
 	}
+	if buildcfg.GOMIPS64.ISALevel >= 2 {
+		brev_arch = append(brev_arch, sys.MIPS64)
+	}
 	/******** runtime/internal/sys ********/
+	if buildcfg.GOMIPS64.ISALevel >= 2 {
+		addF("runtime/internal/sys", "Bswap16",
+			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+				return s.newValue1(ssa.OpBswap16, types.Types[types.TUINT16], args[0])
+			},
+			sys.MIPS64)
+	}
 	addF("runtime/internal/sys", "Bswap32",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			return s.newValue1(ssa.OpBswap32, types.Types[types.TUINT32], args[0])

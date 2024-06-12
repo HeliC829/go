@@ -2,6 +2,7 @@
 
 package ssa
 
+import "internal/buildcfg"
 import "cmd/compile/internal/types"
 
 func rewriteValueMIPS64(v *Value) bool {
@@ -100,6 +101,12 @@ func rewriteValueMIPS64(v *Value) bool {
 		return true
 	case OpAvg64u:
 		return rewriteValueMIPS64_OpAvg64u(v)
+	case OpBswap16:
+		return rewriteValueMIPS64_OpBswap16(v)
+	case OpBswap32:
+		return rewriteValueMIPS64_OpBswap32(v)
+	case OpBswap64:
+		return rewriteValueMIPS64_OpBswap64(v)
 	case OpClosureCall:
 		v.Op = OpMIPS64CALLclosure
 		return true
@@ -902,6 +909,70 @@ func rewriteValueMIPS64_OpAvg64u(v *Value) bool {
 		v.AddArg2(v0, y)
 		return true
 	}
+}
+func rewriteValueMIPS64_OpBswap16(v *Value) bool {
+	v_0 := v.Args[0]
+	// match: (Bswap16 <t> x)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 2
+	// result: (WSBH <t> x)
+	for {
+		t := v.Type
+		x := v_0
+		if !(buildcfg.GOMIPS64.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPS64WSBH)
+		v.Type = t
+		v.AddArg(x)
+		return true
+	}
+	return false
+}
+func rewriteValueMIPS64_OpBswap32(v *Value) bool {
+	v_0 := v.Args[0]
+	b := v.Block
+	typ := &b.Func.Config.Types
+	// match: (Bswap32 <t> x)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 2
+	// result: (SRLVconst (DSBH <t> (DSHD <t> (ZeroExt32to64 x))) [32])
+	for {
+		t := v.Type
+		x := v_0
+		if !(buildcfg.GOMIPS64.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPS64SRLVconst)
+		v.AuxInt = int64ToAuxInt(32)
+		v0 := b.NewValue0(v.Pos, OpMIPS64DSBH, t)
+		v1 := b.NewValue0(v.Pos, OpMIPS64DSHD, t)
+		v2 := b.NewValue0(v.Pos, OpZeroExt32to64, typ.UInt64)
+		v2.AddArg(x)
+		v1.AddArg(v2)
+		v0.AddArg(v1)
+		v.AddArg(v0)
+		return true
+	}
+	return false
+}
+func rewriteValueMIPS64_OpBswap64(v *Value) bool {
+	v_0 := v.Args[0]
+	b := v.Block
+	// match: (Bswap64 <t> x)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 2
+	// result: (DSBH (DSHD <t> x))
+	for {
+		t := v.Type
+		x := v_0
+		if !(buildcfg.GOMIPS64.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPS64DSBH)
+		v0 := b.NewValue0(v.Pos, OpMIPS64DSHD, t)
+		v0.AddArg(x)
+		v.AddArg(v0)
+		return true
+	}
+	return false
 }
 func rewriteValueMIPS64_OpCom16(v *Value) bool {
 	v_0 := v.Args[0]
