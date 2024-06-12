@@ -4946,16 +4946,24 @@ func InitTables() {
 			return s.newValue2(ssa.OpRotateLeft16, types.Types[types.TUINT16], args[0], args[1])
 		},
 		sys.AMD64)
+	RotateLeft32_arch := []sys.ArchFamily{sys.AMD64, sys.ARM, sys.ARM64, sys.Loong64, sys.PPC64, sys.S390X, sys.Wasm}
+	if buildcfg.GOMIPS64.ISALevel >= 2 {
+		RotateLeft32_arch = append(RotateLeft32_arch, sys.MIPS64)
+	}
 	addF("math/bits", "RotateLeft32",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			return s.newValue2(ssa.OpRotateLeft32, types.Types[types.TUINT32], args[0], args[1])
 		},
-		sys.AMD64, sys.ARM, sys.ARM64, sys.S390X, sys.PPC64, sys.Wasm, sys.Loong64)
+		RotateLeft32_arch...)
+	RotateLeft64_arch := []sys.ArchFamily{sys.AMD64, sys.ARM64, sys.Loong64, sys.PPC64, sys.S390X, sys.Wasm}
+	if buildcfg.GOMIPS64.ISALevel >= 2 {
+		RotateLeft64_arch = append(RotateLeft64_arch, sys.MIPS64)
+	}
 	addF("math/bits", "RotateLeft64",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			return s.newValue2(ssa.OpRotateLeft64, types.Types[types.TUINT64], args[0], args[1])
 		},
-		sys.AMD64, sys.ARM64, sys.S390X, sys.PPC64, sys.Wasm, sys.Loong64)
+		RotateLeft64_arch...)
 	alias("math/bits", "RotateLeft", "math/bits", "RotateLeft64", p8...)
 
 	makeOnesCountAMD64 := func(op ssa.Op) func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
