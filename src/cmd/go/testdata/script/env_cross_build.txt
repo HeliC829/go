@@ -13,7 +13,7 @@ go build internal/abi
 env GOENV=ios-arm64
 go build internal/abi
 
-env GOENV=linux-mips
+env GOENV=linux-mips64
 go build internal/abi
 
 -- windows-amd64 --
@@ -24,6 +24,6 @@ GOARCH=amd64
 GOOS=ios
 GOARCH=arm64
 
--- linux-mips --
+-- linux-mips64 --
 GOOS=linux
-GOARCH=mips
+GOARCH=mips64

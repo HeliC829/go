@@ -27,8 +27,8 @@ var (
 	GO386    = envOr("GO386", defaultGO386)
 	GOAMD64  = goamd64()
 	GOARM    = goarm()
-	GOMIPS   = gomips()
-	GOMIPS64 = gomips64()
+	GOMIPS   = gomipsenv(false)
+	GOMIPS64 = gomipsenv(true)
 	GOPPC64  = goppc64()
 	GOWASM   = gowasm()
 	ToolTags = toolTags()
@@ -126,22 +126,65 @@ func goarm() (g goarmFeatures) {
 	return
 }
 
-func gomips() string {
-	switch v := envOr("GOMIPS", defaultGOMIPS); v {
-	case "hardfloat", "softfloat":
-		return v
-	}
-	Error = fmt.Errorf("invalid GOMIPS: must be hardfloat, softfloat")
-	return defaultGOMIPS
+// We support MIPS III, R1, R2, R5 now
+var MipsIsaRevMap = map[int]string{
+	0: "iii",
+	1: "r1",
+	2: "r2",
+	5: "r5",
 }
 
-func gomips64() string {
-	switch v := envOr("GOMIPS64", defaultGOMIPS64); v {
-	case "hardfloat", "softfloat":
-		return v
+type goMipsFeatures struct {
+	Float    string
+	ISALevel int
+}
+
+func (g goMipsFeatures) String() string {
+	return fmt.Sprintf("%s,%s", g.Float, MipsIsaRevMap[g.ISALevel])
+}
+
+func gomipsenv(_64bit bool) (g goMipsFeatures) {
+	var mipsEnvVal []string
+	var archEnvName string
+	if _64bit {
+		archEnvName = "GOMIPS64"
+		mipsEnvVal = strings.Split(envOr(archEnvName, defaultGOMIPS64), ",")
+	} else {
+		archEnvName = "GOMIPS"
+		mipsEnvVal = strings.Split(envOr(archEnvName, defaultGOMIPS), ",")
 	}
-	Error = fmt.Errorf("invalid GOMIPS64: must be hardfloat, softfloat")
-	return defaultGOMIPS64
+	if len(mipsEnvVal) > 2 {
+		Error = fmt.Errorf("invalid %s: too many options passed", archEnvName)
+	}
+	floatSetTimes := 0
+	for _, opt := range mipsEnvVal {
+		switch opt {
+		case "hardfloat", "softfloat":
+			g.Float = opt
+			floatSetTimes++
+		case "iii":
+			if _64bit {
+				g.ISALevel = 0
+			} else {
+				Error = fmt.Errorf("invalid %s: unsupported ISA level %q, %s", archEnvName, opt, mipsEnvVal)
+			}
+		case "r1":
+			g.ISALevel = 1
+		case "r2":
+			g.ISALevel = 2
+		case "r5":
+			g.ISALevel = 5
+		default:
+			Error = fmt.Errorf("invalid %s: unsupported option %q", archEnvName, opt)
+		}
+	}
+	if len(mipsEnvVal)-floatSetTimes == 2 || floatSetTimes == 2 {
+		Error = fmt.Errorf("invalid %s: options duplicated", archEnvName)
+	}
+	if floatSetTimes == 0 {
+		g.Float = "hardfloat" // set hardfloat as default if environment variable define ISA level only
+	}
+	return
 }
 
 func goppc64() int {
@@ -223,9 +266,9 @@ func GOGOARCH() (name, value string) {
 	case "arm":
 		return "GOARM", GOARM.String()
 	case "mips", "mipsle":
-		return "GOMIPS", GOMIPS
+		return "GOMIPS", GOMIPS.String()
 	case "mips64", "mips64le":
-		return "GOMIPS64", GOMIPS64
+		return "GOMIPS64", GOMIPS64.String()
 	case "ppc64", "ppc64le":
 		return "GOPPC64", fmt.Sprintf("power%d", GOPPC64)
 	case "wasm":
@@ -251,9 +294,15 @@ func gogoarchTags() []string {
 		}
 		return list
 	case "mips", "mipsle":
-		return []string{GOARCH + "." + GOMIPS}
+		var list []string
+		list = append(list, fmt.Sprintf("%s.%s", GOARCH, GOMIPS.Float))
+		list = append(list, fmt.Sprintf("%s.%s", GOARCH, MipsIsaRevMap[GOMIPS.ISALevel]))
+		return list
 	case "mips64", "mips64le":
-		return []string{GOARCH + "." + GOMIPS64}
+		var list []string
+		list = append(list, fmt.Sprintf("%s.%s", GOARCH, GOMIPS64.Float))
+		list = append(list, fmt.Sprintf("%s.%s", GOARCH, MipsIsaRevMap[GOMIPS64.ISALevel]))
+		return list
 	case "ppc64", "ppc64le":
 		var list []string
 		for i := 8; i <= GOPPC64; i++ {
