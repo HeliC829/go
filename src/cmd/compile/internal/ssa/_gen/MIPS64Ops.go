@@ -200,6 +200,11 @@ func init() {
 		{name: "SQRTD", argLength: 1, reg: fp11, asm: "SQRTD"}, // sqrt(arg0), float64
 		{name: "SQRTF", argLength: 1, reg: fp11, asm: "SQRTF"}, // sqrt(arg0), float32
 
+		// bits ops
+		{name: "WSBH", argLength: 1, reg: gp11, asm: "WSBH"}, // Word Swap Bytes Within Halfwords, 32-bit
+		{name: "DSBH", argLength: 1, reg: gp11, asm: "DSBH"}, // Doubleword Swap Bytes Within Halfwords, 64-bit
+		{name: "DSHD", argLength: 1, reg: gp11, asm: "DSHD"}, // Doubleword Swap Halfwords Within Doublewords, 64-bit
+
 		// shifts
 		{name: "SLLV", argLength: 2, reg: gp21, asm: "SLLV"},                    // arg0 << arg1, shift amount is mod 64
 		{name: "SLLVconst", argLength: 1, reg: gp11, asm: "SLLV", aux: "Int64"}, // arg0 << auxInt
