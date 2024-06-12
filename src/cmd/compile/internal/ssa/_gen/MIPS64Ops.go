@@ -201,6 +201,8 @@ func init() {
 		{name: "SQRTF", argLength: 1, reg: fp11, asm: "SQRTF"}, // sqrt(arg0), float32
 
 		// bits ops
+		{name: "CLZ", argLength: 1, reg: gp11, asm: "CLZ"},   // count leading zero, 32-bit
+		{name: "CLZV", argLength: 1, reg: gp11, asm: "CLZV"}, // count leading zero, 64-bit
 		{name: "WSBH", argLength: 1, reg: gp11, asm: "WSBH"}, // Word Swap Bytes Within Halfwords, 32-bit
 		{name: "DSBH", argLength: 1, reg: gp11, asm: "DSBH"}, // Doubleword Swap Bytes Within Halfwords, 64-bit
 		{name: "DSHD", argLength: 1, reg: gp11, asm: "DSHD"}, // Doubleword Swap Halfwords Within Doublewords, 64-bit
