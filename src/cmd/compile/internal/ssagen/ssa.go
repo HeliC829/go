@@ -4947,6 +4947,9 @@ func InitTables() {
 		},
 		sys.AMD64)
 	RotateLeft32_arch := []sys.ArchFamily{sys.AMD64, sys.ARM, sys.ARM64, sys.Loong64, sys.PPC64, sys.S390X, sys.Wasm}
+	if buildcfg.GOMIPS.ISALevel >= 2 {
+		RotateLeft32_arch = append(RotateLeft32_arch, sys.MIPS)
+	}
 	if buildcfg.GOMIPS64.ISALevel >= 2 {
 		RotateLeft32_arch = append(RotateLeft32_arch, sys.MIPS64)
 	}
