@@ -4817,16 +4817,24 @@ func InitTables() {
 			sys.PPC64)
 	}
 
+	len64_arch := []sys.ArchFamily{sys.AMD64, sys.ARM64, sys.ARM, sys.S390X, sys.MIPS, sys.PPC64, sys.Wasm}
+	if buildcfg.GOMIPS64.ISALevel >= 1 {
+		len64_arch = append(len64_arch, sys.MIPS64)
+	}
 	addF("math/bits", "Len64",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			return s.newValue1(ssa.OpBitLen64, types.Types[types.TINT], args[0])
 		},
-		sys.AMD64, sys.ARM64, sys.ARM, sys.S390X, sys.MIPS, sys.PPC64, sys.Wasm)
+		len64_arch...)
+	len32_arch := []sys.ArchFamily{sys.AMD64, sys.ARM64, sys.PPC64}
+	if buildcfg.GOMIPS64.ISALevel >= 1 {
+		len32_arch = append(len32_arch, sys.MIPS64)
+	}
 	addF("math/bits", "Len32",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			return s.newValue1(ssa.OpBitLen32, types.Types[types.TINT], args[0])
 		},
-		sys.AMD64, sys.ARM64, sys.PPC64)
+		len32_arch...)
 	addF("math/bits", "Len32",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			if s.config.PtrSize == 4 {
@@ -4836,6 +4844,10 @@ func InitTables() {
 			return s.newValue1(ssa.OpBitLen64, types.Types[types.TINT], x)
 		},
 		sys.ARM, sys.S390X, sys.MIPS, sys.Wasm)
+	len16_arch := []sys.ArchFamily{sys.ARM64, sys.ARM, sys.S390X, sys.MIPS, sys.PPC64, sys.Wasm}
+	if buildcfg.GOMIPS64.ISALevel >= 1 {
+		len16_arch = append(len16_arch, sys.MIPS64)
+	}
 	addF("math/bits", "Len16",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			if s.config.PtrSize == 4 {
@@ -4845,12 +4857,16 @@ func InitTables() {
 			x := s.newValue1(ssa.OpZeroExt16to64, types.Types[types.TUINT64], args[0])
 			return s.newValue1(ssa.OpBitLen64, types.Types[types.TINT], x)
 		},
-		sys.ARM64, sys.ARM, sys.S390X, sys.MIPS, sys.PPC64, sys.Wasm)
+		len16_arch...)
 	addF("math/bits", "Len16",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			return s.newValue1(ssa.OpBitLen16, types.Types[types.TINT], args[0])
 		},
 		sys.AMD64)
+	len8_arch := []sys.ArchFamily{sys.ARM64, sys.ARM, sys.S390X, sys.MIPS, sys.PPC64, sys.Wasm}
+	if buildcfg.GOMIPS64.ISALevel >= 1 {
+		len8_arch = append(len8_arch, sys.MIPS64)
+	}
 	addF("math/bits", "Len8",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			if s.config.PtrSize == 4 {
@@ -4860,12 +4876,16 @@ func InitTables() {
 			x := s.newValue1(ssa.OpZeroExt8to64, types.Types[types.TUINT64], args[0])
 			return s.newValue1(ssa.OpBitLen64, types.Types[types.TINT], x)
 		},
-		sys.ARM64, sys.ARM, sys.S390X, sys.MIPS, sys.PPC64, sys.Wasm)
+		len8_arch...)
 	addF("math/bits", "Len8",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			return s.newValue1(ssa.OpBitLen8, types.Types[types.TINT], args[0])
 		},
 		sys.AMD64)
+	len_arch := []sys.ArchFamily{sys.AMD64, sys.ARM64, sys.ARM, sys.S390X, sys.MIPS, sys.PPC64, sys.Wasm}
+	if buildcfg.GOMIPS64.ISALevel >= 1 {
+		len_arch = append(len_arch, sys.MIPS64)
+	}
 	addF("math/bits", "Len",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 			if s.config.PtrSize == 4 {
@@ -4873,7 +4893,7 @@ func InitTables() {
 			}
 			return s.newValue1(ssa.OpBitLen64, types.Types[types.TINT], args[0])
 		},
-		sys.AMD64, sys.ARM64, sys.ARM, sys.S390X, sys.MIPS, sys.PPC64, sys.Wasm)
+		len_arch...)
 	// LeadingZeros is handled because it trivially calls Len.
 	addF("math/bits", "Reverse64",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
