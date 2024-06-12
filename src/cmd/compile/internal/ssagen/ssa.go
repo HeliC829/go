@@ -4264,12 +4264,20 @@ func InitTables() {
 		brev_arch = append(brev_arch, sys.MIPS64)
 	}
 	/******** runtime/internal/sys ********/
+	brev16_arch := []sys.ArchFamily{}
+	if buildcfg.GOMIPS.ISALevel >= 2 {
+		brev16_arch = append(brev16_arch, sys.MIPS)
+	}
 	if buildcfg.GOMIPS64.ISALevel >= 2 {
-		addF("runtime/internal/sys", "Bswap16",
-			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
-				return s.newValue1(ssa.OpBswap16, types.Types[types.TUINT16], args[0])
-			},
-			sys.MIPS64)
+		brev16_arch = append(brev16_arch, sys.MIPS64)
+	}
+	addF("runtime/internal/sys", "Bswap16",
+		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+			return s.newValue1(ssa.OpBswap16, types.Types[types.TUINT16], args[0])
+		},
+		brev16_arch...)
+	if buildcfg.GOMIPS64.ISALevel >= 2 {
+		brev_arch = append(brev_arch, sys.MIPS64)
 	}
 	addF("runtime/internal/sys", "Bswap32",
 		func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {

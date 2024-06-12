@@ -194,6 +194,7 @@ func init() {
 		{name: "SRAconst", argLength: 1, reg: gp11, asm: "SRA", aux: "Int32"}, // arg0 >> auxInt, signed, shift amount must be 0 through 31 inclusive
 
 		{name: "CLZ", argLength: 1, reg: gp11, asm: "CLZ"},
+		{name: "WSBH", argLength: 1, reg: gp11, asm: "WSBH"},                    // Word Swap Bytes Within Halfwords, 32-bit
 		{name: "ROTR", argLength: 2, reg: gp21, asm: "ROTR"},                    // rotate right arg0 by arg1, shift amount is mod 32
 		{name: "ROTRconst", argLength: 1, reg: gp11, asm: "ROTR", aux: "Int32"}, // uint32(arg0) right rotate by auxInt bits, auxInt should be in the range 0 to 31.
 

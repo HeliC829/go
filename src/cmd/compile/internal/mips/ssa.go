@@ -161,6 +161,7 @@ func ssaGenValue(s *ssagen.State, v *ssa.Value) {
 		ssa.OpMIPSSRL,
 		ssa.OpMIPSSRA,
 		ssa.OpMIPSROTR,
+		ssa.OpMIPSWSBH,
 		ssa.OpMIPSADDF,
 		ssa.OpMIPSADDD,
 		ssa.OpMIPSSUBF,
