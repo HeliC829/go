@@ -2096,6 +2096,7 @@ func vshift(a obj.As) bool {
 	case ASLLV,
 		ASRLV,
 		ASRAV,
+		AROTR,
 		AROTRV:
 		return true
 	}
