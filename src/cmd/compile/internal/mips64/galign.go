@@ -18,7 +18,7 @@ func Init(arch *ssagen.ArchInfo) {
 	}
 	arch.REGSP = mips.REGSP
 	arch.MAXWIDTH = 1 << 50
-	arch.SoftFloat = buildcfg.GOMIPS64 == "softfloat"
+	arch.SoftFloat = (buildcfg.GOMIPS64.Float == "softfloat")
 	arch.ZeroRange = zerorange
 	arch.Ginsnop = ginsnop
 

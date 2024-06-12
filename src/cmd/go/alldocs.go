@@ -1989,12 +1989,19 @@
 //   - For GOARCH=arm, GOARM=5, 6, and 7
 //     correspond to the arm.5, arm.6, and arm.7 feature build tags.
 //   - For GOARCH=mips or mipsle,
-//     GOMIPS=hardfloat and softfloat
-//     correspond to the mips.hardfloat and mips.softfloat
+//     GOMIPS=r1, r2 and r5
+//     correspond to the mips.r1, mips.r2 and mips.r5
+//     (or mipsle.r1, mipsle.r2 and mipsle.r5) feature build tags.
+//     These can be combined (as a comma separated list) with GOMIPS=hardfloat or softfloat,
+//     which correspond to the mips.hardfloat and mips.softfloat
 //     (or mipsle.hardfloat and mipsle.softfloat) feature build tags.
 //   - For GOARCH=mips64 or mips64le,
-//     GOMIPS64=hardfloat and softfloat
-//     correspond to the mips64.hardfloat and mips64.softfloat
+//     GOMIPS64=iii, r1, r2 and r5
+//     correspond to the mips64.iii, mips64.r1, mips64.r2 and mips64.r5
+//     (or mips64le.iii, mips64le.r1, mips64le.r2 and mips64le.r5)
+//     feature build tags.
+//     These can be combined (as a comma separated list) with GOMIPS64=hardfloat or softfloat,
+//     which correspond to the mips64.hardfloat and mips64.softfloat
 //     (or mips64le.hardfloat and mips64le.softfloat) feature build tags.
 //   - For GOARCH=ppc64 or ppc64le,
 //     GOPPC64=power8, power9, and power10 correspond to the
@@ -2292,11 +2299,17 @@
 //		Valid values are v1 (default), v2, v3, v4.
 //		See https://golang.org/wiki/MinimumRequirements#amd64
 //	GOMIPS
-//		For GOARCH=mips{,le}, whether to use floating point instructions.
-//		Valid values are hardfloat (default), softfloat.
+//		For GOARCH=mips{,le}, whether to use floating point instructions and different ISA level.
+//		Valid values are hardfloat (default), softfloat, r1 (default), r2, r5.
+//		These can be combined (as a comma separated list) with hardfloat or softfloat,
+//		whether to use floating point instructions.
+//		Default value is 'r1,hardfloat', use MIPS R1 as the target ISA with hardfloat.
 //	GOMIPS64
-//		For GOARCH=mips64{,le}, whether to use floating point instructions.
-//		Valid values are hardfloat (default), softfloat.
+//		For GOARCH=mips64{,le}, whether to use floating point instructions and different ISA level.
+//		Valid values are hardfloat (default), softfloat, iii (default), r1, r2, r5.
+//		These can be combined (as a comma separated list) with hardfloat or softfloat,
+//		whether to use floating point instructions.
+//		Default value is 'iii,hardfloat', use MIPS III as the target ISA with hardfloat.
 //	GOPPC64
 //		For GOARCH=ppc64{,le}, the target ISA (Instruction Set Architecture).
 //		Valid values are power8 (default), power9, power10.

@@ -411,8 +411,8 @@ var (
 	GOARM    = envOr("GOARM", fmt.Sprint(buildcfg.GOARM))
 	GO386    = envOr("GO386", buildcfg.GO386)
 	GOAMD64  = envOr("GOAMD64", fmt.Sprintf("%s%d", "v", buildcfg.GOAMD64))
-	GOMIPS   = envOr("GOMIPS", buildcfg.GOMIPS)
-	GOMIPS64 = envOr("GOMIPS64", buildcfg.GOMIPS64)
+	GOMIPS   = envOr("GOMIPS", fmt.Sprint(buildcfg.GOMIPS))
+	GOMIPS64 = envOr("GOMIPS64", fmt.Sprint(buildcfg.GOMIPS64))
 	GOPPC64  = envOr("GOPPC64", fmt.Sprintf("%s%d", "power", buildcfg.GOPPC64))
 	GOWASM   = envOr("GOWASM", fmt.Sprint(buildcfg.GOWASM))
 

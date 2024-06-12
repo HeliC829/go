@@ -165,6 +165,7 @@ func xinit() {
 	}
 	gomips = b
 
+	// TODO: Add default ISA level after minimum Go bootstrap version includes CL 508095 (see #60072)
 	b = os.Getenv("GOMIPS64")
 	if b == "" {
 		b = "hardfloat"
@@ -872,11 +873,15 @@ func runInstall(pkg string, ch chan struct{}) {
 	}
 	if goarch == "mips" || goarch == "mipsle" {
 		// Define GOMIPS_value from gomips.
-		asmArgs = append(asmArgs, "-D", "GOMIPS_"+gomips)
+		for _, opt := range strings.Split(gomips, ",") {
+			asmArgs = append(asmArgs, "-D", "GOMIPS_"+opt)
+		}
 	}
 	if goarch == "mips64" || goarch == "mips64le" {
 		// Define GOMIPS64_value from gomips64.
-		asmArgs = append(asmArgs, "-D", "GOMIPS64_"+gomips64)
+		for _, opt := range strings.Split(gomips64, ",") {
+			asmArgs = append(asmArgs, "-D", "GOMIPS64_"+opt)
+		}
 	}
 	if goarch == "ppc64" || goarch == "ppc64le" {
 		// We treat each powerpc version as a superset of functionality.
