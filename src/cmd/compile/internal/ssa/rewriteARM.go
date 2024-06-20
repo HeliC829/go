@@ -5312,6 +5312,23 @@ func rewriteValueARM_OpARMMOVDstore(v *Value) bool {
 func rewriteValueARM_OpARMMOVFload(v *Value) bool {
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
+	// match: (MOVFload [off] {sym} ptr (MOVWstore [off] {sym} ptr val _))
+	// result: (MOVWgpfp val)
+	for {
+		off := auxIntToInt32(v.AuxInt)
+		sym := auxToSym(v.Aux)
+		ptr := v_0
+		if v_1.Op != OpARMMOVWstore || auxIntToInt32(v_1.AuxInt) != off || auxToSym(v_1.Aux) != sym {
+			break
+		}
+		val := v_1.Args[1]
+		if ptr != v_1.Args[0] {
+			break
+		}
+		v.reset(OpARMMOVWgpfp)
+		v.AddArg(val)
+		return true
+	}
 	// match: (MOVFload [off1] {sym} (ADDconst [off2] ptr) mem)
 	// result: (MOVFload [off1+off2] {sym} ptr mem)
 	for {
@@ -5394,6 +5411,23 @@ func rewriteValueARM_OpARMMOVFstore(v *Value) bool {
 	v_2 := v.Args[2]
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
+	// match: (MOVFstore [off] {sym} ptr (MOVWgpfp val) mem)
+	// result: (MOVWstore [off] {sym} ptr val mem)
+	for {
+		off := auxIntToInt32(v.AuxInt)
+		sym := auxToSym(v.Aux)
+		ptr := v_0
+		if v_1.Op != OpARMMOVWgpfp {
+			break
+		}
+		val := v_1.Args[0]
+		mem := v_2
+		v.reset(OpARMMOVWstore)
+		v.AuxInt = int32ToAuxInt(off)
+		v.Aux = symToAux(sym)
+		v.AddArg3(ptr, val, mem)
+		return true
+	}
 	// match: (MOVFstore [off1] {sym} (ADDconst [off2] ptr) val mem)
 	// result: (MOVFstore [off1+off2] {sym} ptr val mem)
 	for {
@@ -6113,6 +6147,23 @@ func rewriteValueARM_OpARMMOVWload(v *Value) bool {
 	v_0 := v.Args[0]
 	b := v.Block
 	config := b.Func.Config
+	// match: (MOVWload [off] {sym} ptr (MOVFstore [off] {sym} ptr val _))
+	// result: (MOVWfpgp val)
+	for {
+		off := auxIntToInt32(v.AuxInt)
+		sym := auxToSym(v.Aux)
+		ptr := v_0
+		if v_1.Op != OpARMMOVFstore || auxIntToInt32(v_1.AuxInt) != off || auxToSym(v_1.Aux) != sym {
+			break
+		}
+		val := v_1.Args[1]
+		if ptr != v_1.Args[0] {
+			break
+		}
+		v.reset(OpARMMOVWfpgp)
+		v.AddArg(val)
+		return true
+	}
 	// match: (MOVWload [off1] {sym} (ADDconst [off2] ptr) mem)
 	// result: (MOVWload [off1+off2] {sym} ptr mem)
 	for {
@@ -6601,6 +6652,23 @@ func rewriteValueARM_OpARMMOVWstore(v *Value) bool {
 	v_2 := v.Args[2]
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
+	// match: (MOVWstore [off] {sym} ptr (MOVWfpgp val) mem)
+	// result: (MOVFstore [off] {sym} ptr val mem)
+	for {
+		off := auxIntToInt32(v.AuxInt)
+		sym := auxToSym(v.Aux)
+		ptr := v_0
+		if v_1.Op != OpARMMOVWfpgp {
+			break
+		}
+		val := v_1.Args[0]
+		mem := v_2
+		v.reset(OpARMMOVFstore)
+		v.AuxInt = int32ToAuxInt(off)
+		v.Aux = symToAux(sym)
+		v.AddArg3(ptr, val, mem)
+		return true
+	}
 	// match: (MOVWstore [off1] {sym} (ADDconst [off2] ptr) val mem)
 	// result: (MOVWstore [off1+off2] {sym} ptr val mem)
 	for {

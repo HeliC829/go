@@ -163,6 +163,7 @@ func fromFloat64(f64 float64) uint64 {
 
 func fromFloat32(f32 float32) uint32 {
 	// amd64:"MOVL\tX.*, [^X].*"
+	// arm/5:"MOVWW\tF.*, R.*"
 	// arm64:"FMOVS\tF.*, R.*"
 	// mips64/hardfloat:"MOVW\tF.*, R.*"
 	return math.Float32bits(f32+1) + 1
@@ -178,6 +179,7 @@ func toFloat64(u64 uint64) float64 {
 
 func toFloat32(u32 uint32) float32 {
 	// amd64:"MOVL\t[^X].*, X.*"
+	// arm/5:"MOVWW\tR.*, F.*"
 	// arm64:"FMOVS\tR.*, F.*"
 	// mips64/hardfloat:"MOVW\tR.*, F.*"
 	return math.Float32frombits(u32+1) + 1
