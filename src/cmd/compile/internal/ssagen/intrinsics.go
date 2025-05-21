@@ -193,6 +193,13 @@ func initIntrinsics(cfg *intrinsicBuildConfig) {
 	if cfg.gomips64.ISALevel >= 2 {
 		brev_arch = append(brev_arch, sys.MIPS64)
 	}
+	if cfg.gomips.ISALevel >= 2 {
+		addF("runtime/internal/sys", "Bswap16",
+			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+				return s.newValue1(ssa.OpBswap16, types.Types[types.TUINT16], args[0])
+			},
+			sys.MIPS)
+	}
 	if cfg.gomips64.ISALevel >= 2 {
 		addF("runtime/internal/sys", "Bswap16",
 			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
