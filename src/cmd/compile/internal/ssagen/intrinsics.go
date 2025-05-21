@@ -1124,6 +1124,18 @@ func initIntrinsics(cfg *intrinsicBuildConfig) {
 			return s.newValue2(ssa.OpRotateLeft64, types.Types[types.TUINT64], args[0], args[1])
 		},
 		sys.AMD64, sys.ARM64, sys.Loong64, sys.PPC64, sys.RISCV64, sys.S390X, sys.Wasm)
+	if cfg.gomips64.ISALevel >= 2 {
+		addF("math/bits", "RotateLeft32",
+			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+				return s.newValue2(ssa.OpRotateLeft32, types.Types[types.TUINT32], args[0], args[1])
+			},
+			sys.MIPS64)
+		addF("math/bits", "RotateLeft64",
+			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+				return s.newValue2(ssa.OpRotateLeft64, types.Types[types.TUINT64], args[0], args[1])
+			},
+			sys.MIPS64)
+	}
 	alias("math/bits", "RotateLeft", "math/bits", "RotateLeft64", p8...)
 
 	makeOnesCountAMD64 := func(op ssa.Op) func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
