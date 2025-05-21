@@ -27,8 +27,8 @@ var (
 	GOAMD64   = goamd64()
 	GOARM     = goarm()
 	GOARM64   = goarm64()
-	GOMIPS    = gomips()
-	GOMIPS64  = gomips64()
+	GOMIPS    = gomipsenv(false)
+	GOMIPS64  = gomipsenv(true)
 	GOPPC64   = goppc64()
 	GORISCV64 = goriscv64()
 	GOWASM    = gowasm()
@@ -270,22 +270,70 @@ func (g Goarm64Features) Supports(s string) bool {
 	}
 }
 
-func gomips() string {
-	switch v := envOr("GOMIPS", DefaultGOMIPS); v {
-	case "hardfloat", "softfloat":
-		return v
-	}
-	Error = fmt.Errorf("invalid GOMIPS: must be hardfloat, softfloat")
-	return DefaultGOMIPS
+// We support MIPS III, R1, R2, R5 now
+var MipsIsaRevMap = map[int]string{
+	0: "iii",
+	1: "r1",
+	2: "r2",
+	5: "r5",
 }
 
-func gomips64() string {
-	switch v := envOr("GOMIPS64", DefaultGOMIPS64); v {
-	case "hardfloat", "softfloat":
-		return v
+type GomipsFeatures struct {
+	Float    string
+	ISALevel int
+}
+
+func (g GomipsFeatures) String() string {
+	return fmt.Sprintf("%s,%s", g.Float, MipsIsaRevMap[g.ISALevel])
+}
+
+func ParseGomips(_64bit bool) (g GomipsFeatures, e error) {
+	var mipsEnvVal []string
+	var archEnvName string
+	if _64bit {
+		archEnvName = "GOMIPS64"
+		mipsEnvVal = strings.Split(envOr(archEnvName, DefaultGOMIPS64), ",")
+	} else {
+		archEnvName = "GOMIPS"
+		mipsEnvVal = strings.Split(envOr(archEnvName, DefaultGOMIPS), ",")
 	}
-	Error = fmt.Errorf("invalid GOMIPS64: must be hardfloat, softfloat")
-	return DefaultGOMIPS64
+	if len(mipsEnvVal) > 2 {
+		Error = fmt.Errorf("invalid %s: too many options passed", archEnvName)
+	}
+	floatSetTimes := 0
+	for _, opt := range mipsEnvVal {
+		switch opt {
+		case "hardfloat", "softfloat":
+			g.Float = opt
+			floatSetTimes++
+		case "iii":
+			if _64bit {
+				g.ISALevel = 0
+			} else {
+				Error = fmt.Errorf("invalid %s: unsupported ISA level %q, %s", archEnvName, opt, mipsEnvVal)
+			}
+		case "r1":
+			g.ISALevel = 1
+		case "r2":
+			g.ISALevel = 2
+		case "r5":
+			g.ISALevel = 5
+		default:
+			Error = fmt.Errorf("invalid %s: unsupported option %q", archEnvName, opt)
+		}
+	}
+	if len(mipsEnvVal)-floatSetTimes == 2 || floatSetTimes == 2 {
+		Error = fmt.Errorf("invalid %s: options duplicated", archEnvName)
+	}
+	if floatSetTimes == 0 {
+		g.Float = "hardfloat" // set hardfloat as default if environment variable define ISA level only
+	}
+	return
+}
+
+func gomipsenv(_64bit bool) (g GomipsFeatures) {
+	g, Error = ParseGomips(_64bit)
+	return
 }
 
 func goppc64() int {
@@ -307,8 +355,10 @@ func goriscv64() int {
 		return 20
 	case "rva22u64":
 		return 22
+	case "rva23u64":
+		return 23
 	}
-	Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64")
+	Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64, rva23u64")
 	v := DefaultGORISCV64[len("rva"):]
 	i := strings.IndexFunc(v, func(r rune) bool {
 		return r < '0' || r > '9'
@@ -385,9 +435,9 @@ func GOGOARCH() (name, value string) {
 	case "arm64":
 		return "GOARM64", GOARM64.String()
 	case "mips", "mipsle":
-		return "GOMIPS", GOMIPS
+		return "GOMIPS", GOMIPS.String()
 	case "mips64", "mips64le":
-		return "GOMIPS64", GOMIPS64
+		return "GOMIPS64", GOMIPS64.String()
 	case "ppc64", "ppc64le":
 		return "GOPPC64", fmt.Sprintf("power%d", GOPPC64)
 	case "wasm":
@@ -427,9 +477,15 @@ func gogoarchTags() []string {
 		}
 		return list
 	case "mips", "mipsle":
-		return []string{GOARCH + "." + GOMIPS}
+		var list []string
+		list = append(list, fmt.Sprintf("%s.%s", GOARCH, GOMIPS.Float))
+		list = append(list, fmt.Sprintf("%s.%s", GOARCH, MipsIsaRevMap[GOMIPS.ISALevel]))
+		return list
 	case "mips64", "mips64le":
-		return []string{GOARCH + "." + GOMIPS64}
+		var list []string
+		list = append(list, fmt.Sprintf("%s.%s", GOARCH, GOMIPS64.Float))
+		list = append(list, fmt.Sprintf("%s.%s", GOARCH, MipsIsaRevMap[GOMIPS64.ISALevel]))
+		return list
 	case "ppc64", "ppc64le":
 		var list []string
 		for i := 8; i <= GOPPC64; i++ {
@@ -440,6 +496,9 @@ func gogoarchTags() []string {
 		list := []string{GOARCH + "." + "rva20u64"}
 		if GORISCV64 >= 22 {
 			list = append(list, GOARCH+"."+"rva22u64")
+		}
+		if GORISCV64 >= 23 {
+			list = append(list, GOARCH+"."+"rva23u64")
 		}
 		return list
 	case "wasm":
