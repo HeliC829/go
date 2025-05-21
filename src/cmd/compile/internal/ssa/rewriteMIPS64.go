@@ -101,6 +101,14 @@ func rewriteValueMIPS64(v *Value) bool {
 		return true
 	case OpAvg64u:
 		return rewriteValueMIPS64_OpAvg64u(v)
+	case OpBitLen16:
+		return rewriteValueMIPS64_OpBitLen16(v)
+	case OpBitLen32:
+		return rewriteValueMIPS64_OpBitLen32(v)
+	case OpBitLen64:
+		return rewriteValueMIPS64_OpBitLen64(v)
+	case OpBitLen8:
+		return rewriteValueMIPS64_OpBitLen8(v)
 	case OpBswap16:
 		return rewriteValueMIPS64_OpBswap16(v)
 	case OpBswap32:
@@ -909,6 +917,90 @@ func rewriteValueMIPS64_OpAvg64u(v *Value) bool {
 		v.AddArg2(v0, y)
 		return true
 	}
+}
+func rewriteValueMIPS64_OpBitLen16(v *Value) bool {
+	v_0 := v.Args[0]
+	b := v.Block
+	typ := &b.Func.Config.Types
+	// match: (BitLen16 x)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 1
+	// result: (BitLen64 (ZeroExt16to64 x))
+	for {
+		x := v_0
+		if !(buildcfg.GOMIPS64.ISALevel >= 1) {
+			break
+		}
+		v.reset(OpBitLen64)
+		v0 := b.NewValue0(v.Pos, OpZeroExt16to64, typ.UInt64)
+		v0.AddArg(x)
+		v.AddArg(v0)
+		return true
+	}
+	return false
+}
+func rewriteValueMIPS64_OpBitLen32(v *Value) bool {
+	v_0 := v.Args[0]
+	b := v.Block
+	typ := &b.Func.Config.Types
+	// match: (BitLen32 x)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 1
+	// result: (SUBV (MOVVconst [32]) (CLZ <typ.Int> x))
+	for {
+		x := v_0
+		if !(buildcfg.GOMIPS64.ISALevel >= 1) {
+			break
+		}
+		v.reset(OpMIPS64SUBV)
+		v0 := b.NewValue0(v.Pos, OpMIPS64MOVVconst, typ.UInt64)
+		v0.AuxInt = int64ToAuxInt(32)
+		v1 := b.NewValue0(v.Pos, OpMIPS64CLZ, typ.Int)
+		v1.AddArg(x)
+		v.AddArg2(v0, v1)
+		return true
+	}
+	return false
+}
+func rewriteValueMIPS64_OpBitLen64(v *Value) bool {
+	v_0 := v.Args[0]
+	b := v.Block
+	typ := &b.Func.Config.Types
+	// match: (BitLen64 x)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 1
+	// result: (SUBV (MOVVconst [64]) (CLZV <typ.Int> x))
+	for {
+		x := v_0
+		if !(buildcfg.GOMIPS64.ISALevel >= 1) {
+			break
+		}
+		v.reset(OpMIPS64SUBV)
+		v0 := b.NewValue0(v.Pos, OpMIPS64MOVVconst, typ.UInt64)
+		v0.AuxInt = int64ToAuxInt(64)
+		v1 := b.NewValue0(v.Pos, OpMIPS64CLZV, typ.Int)
+		v1.AddArg(x)
+		v.AddArg2(v0, v1)
+		return true
+	}
+	return false
+}
+func rewriteValueMIPS64_OpBitLen8(v *Value) bool {
+	v_0 := v.Args[0]
+	b := v.Block
+	typ := &b.Func.Config.Types
+	// match: (BitLen8 x)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 1
+	// result: (BitLen64 (ZeroExt8to64 x))
+	for {
+		x := v_0
+		if !(buildcfg.GOMIPS64.ISALevel >= 1) {
+			break
+		}
+		v.reset(OpBitLen64)
+		v0 := b.NewValue0(v.Pos, OpZeroExt8to64, typ.UInt64)
+		v0.AddArg(x)
+		v.AddArg(v0)
+		return true
+	}
+	return false
 }
 func rewriteValueMIPS64_OpBswap16(v *Value) bool {
 	v_0 := v.Args[0]
