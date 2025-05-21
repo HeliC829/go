@@ -115,6 +115,7 @@
 (RotateLeft8  <t> x (MOVWconst [c])) => (Or8  (Lsh8x32 <t>  x (MOVWconst [c&7]))  (Rsh8Ux32 <t> x (MOVWconst [-c&7])))
 (RotateLeft16 <t> x (MOVWconst [c])) => (Or16 (Lsh16x32 <t> x (MOVWconst [c&15])) (Rsh16Ux32 <t> x (MOVWconst [-c&15])))
 (RotateLeft32 <t> x (MOVWconst [c])) => (Or32 (Lsh32x32 <t> x (MOVWconst [c&31])) (Rsh32Ux32 <t> x (MOVWconst [-c&31])))
+(RotateLeft32 x y) && buildcfg.GOMIPS.ISALevel >= 2 => (ROTR x (NEG <typ.Int> y))
 (RotateLeft64 <t> x (MOVWconst [c])) => (Or64 (Lsh64x32 <t> x (MOVWconst [c&63])) (Rsh64Ux32 <t> x (MOVWconst [-c&63])))
 
 // unary ops
@@ -586,9 +587,10 @@
 (XOR x (MOVWconst [c])) => (XORconst [c] x)
 (NOR x (MOVWconst [c])) => (NORconst [c] x)
 
-(SLL x (MOVWconst [c])) => (SLLconst x [c&31])
-(SRL x (MOVWconst [c])) => (SRLconst x [c&31])
-(SRA x (MOVWconst [c])) => (SRAconst x [c&31])
+(SLL  x (MOVWconst [c])) => (SLLconst x [c&31])
+(SRL  x (MOVWconst [c])) => (SRLconst x [c&31])
+(SRA  x (MOVWconst [c])) => (SRAconst x [c&31])
+(ROTR x (MOVWconst [c])) && buildcfg.GOMIPS.ISALevel >= 2 => (ROTRconst x [c&31])
 
 (SGT  (MOVWconst [c]) x) => (SGTconst  [c] x)
 (SGTU (MOVWconst [c]) x) => (SGTUconst [c] x)

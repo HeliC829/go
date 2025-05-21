@@ -2,6 +2,7 @@
 
 package ssa
 
+import "internal/buildcfg"
 import "cmd/compile/internal/types"
 
 func rewriteValueMIPS(v *Value) bool {
@@ -319,6 +320,8 @@ func rewriteValueMIPS(v *Value) bool {
 		return rewriteValueMIPS_OpMIPSOR(v)
 	case OpMIPSORconst:
 		return rewriteValueMIPS_OpMIPSORconst(v)
+	case OpMIPSROTR:
+		return rewriteValueMIPS_OpMIPSROTR(v)
 	case OpMIPSSGT:
 		return rewriteValueMIPS_OpMIPSSGT(v)
 	case OpMIPSSGTU:
@@ -4170,6 +4173,28 @@ func rewriteValueMIPS_OpMIPSORconst(v *Value) bool {
 	}
 	return false
 }
+func rewriteValueMIPS_OpMIPSROTR(v *Value) bool {
+	v_1 := v.Args[1]
+	v_0 := v.Args[0]
+	// match: (ROTR x (MOVWconst [c]))
+	// cond: buildcfg.GOMIPS.ISALevel >= 2
+	// result: (ROTRconst x [c&31])
+	for {
+		x := v_0
+		if v_1.Op != OpMIPSMOVWconst {
+			break
+		}
+		c := auxIntToInt32(v_1.AuxInt)
+		if !(buildcfg.GOMIPS.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPSROTRconst)
+		v.AuxInt = int32ToAuxInt(c & 31)
+		v.AddArg(x)
+		return true
+	}
+	return false
+}
 func rewriteValueMIPS_OpMIPSSGT(v *Value) bool {
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
@@ -5635,6 +5660,21 @@ func rewriteValueMIPS_OpRotateLeft32(v *Value) bool {
 		v3.AuxInt = int32ToAuxInt(-c & 31)
 		v2.AddArg2(x, v3)
 		v.AddArg2(v0, v2)
+		return true
+	}
+	// match: (RotateLeft32 x y)
+	// cond: buildcfg.GOMIPS.ISALevel >= 2
+	// result: (ROTR x (NEG <typ.Int> y))
+	for {
+		x := v_0
+		y := v_1
+		if !(buildcfg.GOMIPS.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPSROTR)
+		v0 := b.NewValue0(v.Pos, OpMIPSNEG, typ.Int)
+		v0.AddArg(y)
+		v.AddArg2(x, v0)
 		return true
 	}
 	return false
