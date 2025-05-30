@@ -149,6 +149,11 @@
 
 (Slicemask <t> x) => (SRAVconst (NEGV <t> x) [63])
 
+(BitLen64 x) && buildcfg.GOMIPS64.ISALevel >= 1 => (SUBV (MOVVconst [64]) (CLZV <typ.Int> x))
+(BitLen32 x) && buildcfg.GOMIPS64.ISALevel >= 1 => (SUBV (MOVVconst [32]) (CLZ  <typ.Int> x))
+(BitLen16 x) && buildcfg.GOMIPS64.ISALevel >= 1 => (BitLen64 (ZeroExt16to64 x))
+(BitLen8  x) && buildcfg.GOMIPS64.ISALevel >= 1 => (BitLen64 (ZeroExt8to64 x))
+
 (Bswap64 <t> x) && buildcfg.GOMIPS64.ISALevel >= 2 => (DSBH (DSHD <t> x))
 (Bswap32 <t> x) && buildcfg.GOMIPS64.ISALevel >= 2 => (SRLVconst (DSBH <t> (DSHD <t> (ZeroExt32to64 x))) [32])
 (Bswap16 <t> x) && buildcfg.GOMIPS64.ISALevel >= 2 => (WSBH <t> x)
