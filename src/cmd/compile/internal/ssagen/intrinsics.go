@@ -951,6 +951,28 @@ func initIntrinsics(cfg *intrinsicBuildConfig) {
 			return s.newValue1(ssa.OpCtz64, types.Types[types.TINT], y)
 		},
 		sys.Loong64, sys.S390X)
+	if cfg.gomips64.ISALevel >= 1 {
+		addF("math/bits", "TrailingZero64",
+			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+				return s.newValue1(ssa.OpCtz64, types.Types[types.TINT], args[0])
+			},
+			sys.MIPS64)
+		addF("math/bits", "TrailingZero32",
+			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+				return s.newValue1(ssa.OpCtz32, types.Types[types.TINT], args[0])
+			},
+			sys.MIPS64)
+		addF("math/bits", "TrailingZero16",
+			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+				return s.newValue1(ssa.OpCtz16, types.Types[types.TINT], args[0])
+			},
+			sys.MIPS64)
+		addF("math/bits", "TrailingZero8",
+			func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+				return s.newValue1(ssa.OpCtz8, types.Types[types.TINT], args[0])
+			},
+			sys.MIPS64)
+	}
 	alias("math/bits", "ReverseBytes64", "internal/runtime/sys", "Bswap64", all...)
 	alias("math/bits", "ReverseBytes32", "internal/runtime/sys", "Bswap32", all...)
 	addF("math/bits", "ReverseBytes16",
