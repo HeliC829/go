@@ -335,12 +335,14 @@ func asmArgs(a *Action, p *load.Package) []any {
 
 	if cfg.Goarch == "mips" || cfg.Goarch == "mipsle" {
 		// Define GOMIPS_value from cfg.GOMIPS.
-		args = append(args, "-D", "GOMIPS_"+cfg.GOMIPS)
+		args = append(args, "-D", "GOMIPS_"+buildcfg.GOMIPS.Float)
+		args = append(args, "-D", "GOMIPS_"+buildcfg.MipsIsaRevMap[buildcfg.GOMIPS.ISALevel])
 	}
 
 	if cfg.Goarch == "mips64" || cfg.Goarch == "mips64le" {
 		// Define GOMIPS64_value from cfg.GOMIPS64.
-		args = append(args, "-D", "GOMIPS64_"+cfg.GOMIPS64)
+		args = append(args, "-D", "GOMIPS64_"+buildcfg.GOMIPS64.Float)
+		args = append(args, "-D", "GOMIPS64_"+buildcfg.MipsIsaRevMap[buildcfg.GOMIPS64.ISALevel])
 	}
 
 	if cfg.Goarch == "ppc64" || cfg.Goarch == "ppc64le" {
