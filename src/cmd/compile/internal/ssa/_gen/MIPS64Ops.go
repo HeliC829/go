@@ -215,6 +215,11 @@ func init() {
 		{name: "SRAV", argLength: 2, reg: gp21, asm: "SRAV"},                    // arg0 >> arg1, signed, shift amount is mod 64
 		{name: "SRAVconst", argLength: 1, reg: gp11, asm: "SRAV", aux: "Int64"}, // arg0 >> auxInt, signed
 
+		{name: "ROTR", argLength: 2, reg: gp21, asm: "ROTR"},                      // rotate right arg0 by arg1, shift amount is mod 32
+		{name: "ROTRconst", argLength: 1, reg: gp11, asm: "ROTR", aux: "Int64"},   // uint32(arg0) right rotate by auxInt bits, auxInt should be in the range 0 to 31.
+		{name: "ROTRV", argLength: 2, reg: gp21, asm: "ROTRV"},                    // rotate right arg0 by arg1, shift amount is mod 32
+		{name: "ROTRVconst", argLength: 1, reg: gp11, asm: "ROTRV", aux: "Int64"}, // arg0 right rotate by auxInt bits, auxInt should be in the range 0 to 63.
+
 		// comparisons
 		{name: "SGT", argLength: 2, reg: gp21, asm: "SGT", typ: "Bool"},                      // 1 if arg0 > arg1 (signed), 0 otherwise
 		{name: "SGTconst", argLength: 1, reg: gp11, asm: "SGT", aux: "Int64", typ: "Bool"},   // 1 if auxInt > arg0 (signed), 0 otherwise

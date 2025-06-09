@@ -411,6 +411,10 @@ func rewriteValueMIPS64(v *Value) bool {
 		return rewriteValueMIPS64_OpMIPS64OR(v)
 	case OpMIPS64ORconst:
 		return rewriteValueMIPS64_OpMIPS64ORconst(v)
+	case OpMIPS64ROTR:
+		return rewriteValueMIPS64_OpMIPS64ROTR(v)
+	case OpMIPS64ROTRV:
+		return rewriteValueMIPS64_OpMIPS64ROTRV(v)
 	case OpMIPS64SGT:
 		return rewriteValueMIPS64_OpMIPS64SGT(v)
 	case OpMIPS64SGTU:
@@ -5112,6 +5116,50 @@ func rewriteValueMIPS64_OpMIPS64ORconst(v *Value) bool {
 	}
 	return false
 }
+func rewriteValueMIPS64_OpMIPS64ROTR(v *Value) bool {
+	v_1 := v.Args[1]
+	v_0 := v.Args[0]
+	// match: (ROTR x (MOVVconst [c]))
+	// cond: buildcfg.GOMIPS64.ISALevel >= 2
+	// result: (ROTRconst x [c&31])
+	for {
+		x := v_0
+		if v_1.Op != OpMIPS64MOVVconst {
+			break
+		}
+		c := auxIntToInt64(v_1.AuxInt)
+		if !(buildcfg.GOMIPS64.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPS64ROTRconst)
+		v.AuxInt = int64ToAuxInt(c & 31)
+		v.AddArg(x)
+		return true
+	}
+	return false
+}
+func rewriteValueMIPS64_OpMIPS64ROTRV(v *Value) bool {
+	v_1 := v.Args[1]
+	v_0 := v.Args[0]
+	// match: (ROTRV x (MOVVconst [c]))
+	// cond: buildcfg.GOMIPS64.ISALevel >= 2
+	// result: (ROTRVconst x [c&63])
+	for {
+		x := v_0
+		if v_1.Op != OpMIPS64MOVVconst {
+			break
+		}
+		c := auxIntToInt64(v_1.AuxInt)
+		if !(buildcfg.GOMIPS64.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPS64ROTRVconst)
+		v.AuxInt = int64ToAuxInt(c & 63)
+		v.AddArg(x)
+		return true
+	}
+	return false
+}
 func rewriteValueMIPS64_OpMIPS64SGT(v *Value) bool {
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
@@ -6711,6 +6759,7 @@ func rewriteValueMIPS64_OpRotateLeft32(v *Value) bool {
 	b := v.Block
 	typ := &b.Func.Config.Types
 	// match: (RotateLeft32 <t> x (MOVVconst [c]))
+	// cond: buildcfg.GOMIPS64.ISALevel < 2
 	// result: (Or32 (Lsh32x64 <t> x (MOVVconst [c&31])) (Rsh32Ux64 <t> x (MOVVconst [-c&31])))
 	for {
 		t := v.Type
@@ -6719,6 +6768,9 @@ func rewriteValueMIPS64_OpRotateLeft32(v *Value) bool {
 			break
 		}
 		c := auxIntToInt64(v_1.AuxInt)
+		if !(buildcfg.GOMIPS64.ISALevel < 2) {
+			break
+		}
 		v.reset(OpOr32)
 		v0 := b.NewValue0(v.Pos, OpLsh32x64, t)
 		v1 := b.NewValue0(v.Pos, OpMIPS64MOVVconst, typ.UInt64)
@@ -6731,6 +6783,21 @@ func rewriteValueMIPS64_OpRotateLeft32(v *Value) bool {
 		v.AddArg2(v0, v2)
 		return true
 	}
+	// match: (RotateLeft32 x y)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 2
+	// result: (ROTR x (NEGV <typ.Int> y))
+	for {
+		x := v_0
+		y := v_1
+		if !(buildcfg.GOMIPS64.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPS64ROTR)
+		v0 := b.NewValue0(v.Pos, OpMIPS64NEGV, typ.Int)
+		v0.AddArg(y)
+		v.AddArg2(x, v0)
+		return true
+	}
 	return false
 }
 func rewriteValueMIPS64_OpRotateLeft64(v *Value) bool {
@@ -6739,6 +6806,7 @@ func rewriteValueMIPS64_OpRotateLeft64(v *Value) bool {
 	b := v.Block
 	typ := &b.Func.Config.Types
 	// match: (RotateLeft64 <t> x (MOVVconst [c]))
+	// cond: buildcfg.GOMIPS64.ISALevel < 2
 	// result: (Or64 (Lsh64x64 <t> x (MOVVconst [c&63])) (Rsh64Ux64 <t> x (MOVVconst [-c&63])))
 	for {
 		t := v.Type
@@ -6747,6 +6815,9 @@ func rewriteValueMIPS64_OpRotateLeft64(v *Value) bool {
 			break
 		}
 		c := auxIntToInt64(v_1.AuxInt)
+		if !(buildcfg.GOMIPS64.ISALevel < 2) {
+			break
+		}
 		v.reset(OpOr64)
 		v0 := b.NewValue0(v.Pos, OpLsh64x64, t)
 		v1 := b.NewValue0(v.Pos, OpMIPS64MOVVconst, typ.UInt64)
@@ -6757,6 +6828,21 @@ func rewriteValueMIPS64_OpRotateLeft64(v *Value) bool {
 		v3.AuxInt = int64ToAuxInt(-c & 63)
 		v2.AddArg2(x, v3)
 		v.AddArg2(v0, v2)
+		return true
+	}
+	// match: (RotateLeft64 x y)
+	// cond: buildcfg.GOMIPS64.ISALevel >= 2
+	// result: (ROTRV x (NEGV <typ.Int> y))
+	for {
+		x := v_0
+		y := v_1
+		if !(buildcfg.GOMIPS64.ISALevel >= 2) {
+			break
+		}
+		v.reset(OpMIPS64ROTRV)
+		v0 := b.NewValue0(v.Pos, OpMIPS64NEGV, typ.Int)
+		v0.AddArg(y)
+		v.AddArg2(x, v0)
 		return true
 	}
 	return false
