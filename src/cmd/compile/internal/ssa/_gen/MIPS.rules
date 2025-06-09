@@ -137,6 +137,8 @@
 // bit length
 (BitLen32 <t> x) => (SUB (MOVWconst [32]) (CLZ <t> x))
 
+(Bswap16 <t> x) && buildcfg.GOMIPS.ISALevel >= 2 => (WSBH <t> x)
+
 // boolean ops -- booleans are represented with 0=false, 1=true
 (AndB ...) => (AND ...)
 (OrB ...) => (OR ...)
