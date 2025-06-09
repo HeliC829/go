@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"go/token"
+	"internal/buildcfg"
 	"internal/lazyregexp"
 	"io"
 	"io/fs"
@@ -2619,15 +2620,28 @@ func (b *Builder) gccArchArgs() []string {
 		return []string{"-m64", "-march=z196"}
 	case "mips64", "mips64le":
 		args := []string{"-mabi=64"}
-		if cfg.GOMIPS64 == "hardfloat" {
-			return append(args, "-mhard-float")
+		if buildcfg.GOMIPS64.Float == "hardfloat" {
+			args = append(args, "-mhard-float")
+			if buildcfg.GOMIPS64.ISALevel == 5 {
+				args = append(args, "-mnan=2008", "-mabs=2008")
+			}
+			return args
 		} else if cfg.GOMIPS64 == "softfloat" {
 			return append(args, "-msoft-float")
 		}
 	case "mips", "mipsle":
-		args := []string{"-mabi=32", "-march=mips32"}
-		if cfg.GOMIPS == "hardfloat" {
-			return append(args, "-mhard-float", "-mfp32", "-mno-odd-spreg")
+		args := []string{"-mabi=32"}
+		if buildcfg.GOMIPS.Float == "hardfloat" {
+			args = append(args, "-mhard-float")
+			switch buildcfg.GOMIPS.ISALevel {
+			case 1:
+				args = append(args, "-mfp32", "-mno-odd-spreg")
+			case 2:
+				args = append(args, "-mfp64")
+			case 5:
+				args = append(args, "-mfp64", "-mnan=2008", "-mabs=2008")
+			}
+			return args
 		} else if cfg.GOMIPS == "softfloat" {
 			return append(args, "-msoft-float")
 		}

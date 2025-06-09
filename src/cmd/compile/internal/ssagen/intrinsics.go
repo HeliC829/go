@@ -36,8 +36,8 @@ type intrinsicBuildConfig struct {
 	goamd64   int
 	goarm     buildcfg.GoarmFeatures
 	goarm64   buildcfg.Goarm64Features
-	gomips    string
-	gomips64  string
+	gomips    buildcfg.GomipsFeatures
+	gomips64  buildcfg.GomipsFeatures
 	goppc64   int
 	goriscv64 int
 }

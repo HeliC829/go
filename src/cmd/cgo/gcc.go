@@ -20,6 +20,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"internal/buildcfg"
 	"internal/xcoff"
 	"math"
 	"os"
@@ -1739,16 +1740,32 @@ func gccMachine() []string {
 	case "s390x":
 		return []string{"-m64"}
 	case "mips64", "mips64le":
-		if gomips64 == "hardfloat" {
-			return []string{"-mabi=64", "-mhard-float"}
-		} else if gomips64 == "softfloat" {
-			return []string{"-mabi=64", "-msoft-float"}
+		args := []string{"-mabi=64"}
+		if buildcfg.GOMIPS64.Float == "hardfloat" {
+			if buildcfg.GOMIPS64.ISALevel == 5 {
+				args = append(args, "-mnan=2008", "-mabs=2008") // Since R5, MIPS support IEEE-754 2008
+			}
+			return append(args, "-mhard-float")
+		} else if buildcfg.GOMIPS64.Float == "softfloat" {
+			return append(args, "-msoft-float")
 		}
 	case "mips", "mipsle":
-		if gomips == "hardfloat" {
-			return []string{"-mabi=32", "-mfp32", "-mhard-float", "-mno-odd-spreg"}
-		} else if gomips == "softfloat" {
-			return []string{"-mabi=32", "-msoft-float"}
+		args := []string{"-mabi=32"}
+		if buildcfg.GOMIPS.Float == "hardfloat" {
+			args = append(args, "-mhard-float")
+			switch buildcfg.GOMIPS.ISALevel {
+			case 1:
+				args = append(args, "-mfp32", "-mno-odd-spreg")
+			case 2:
+				args = append(args, "-mfp64")
+			case 5:
+				args = append(args, "-mfp64", "-mnan=2008", "-mabs=2008") // Since R5, MIPS support IEEE-754 2008
+			default:
+				fatalf("unsupported MIPS ISA level in Elfinit: %d", buildcfg.GOMIPS.ISALevel)
+			}
+			return args
+		} else if buildcfg.GOMIPS.Float == "softfloat" {
+			return append(args, "-msoft-float")
 		}
 	case "loong64":
 		return []string{"-mabi=lp64d"}
