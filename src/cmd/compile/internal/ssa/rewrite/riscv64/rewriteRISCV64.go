@@ -3138,7 +3138,7 @@ func rewriteValue_OpMove(v *ssa.Value) bool {
 		return true
 	}
 	// match: (Move [s] {t} dst src mem)
-	// cond: s > 3*8*ssa.MoveSize(t.Alignment(), config) && ssa.LogLargeCopyValue(v, s)
+	// cond: s > 3*8*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 < 23 && ssa.LogLargeCopyValue(v, s)
 	// result: (LoweredMoveLoop [s] {t.Alignment()} dst src mem)
 	for {
 		s := ssa.AuxIntToInt64(v.AuxInt)
@@ -3146,10 +3146,28 @@ func rewriteValue_OpMove(v *ssa.Value) bool {
 		dst := v_0
 		src := v_1
 		mem := v_2
-		if !(s > 3*8*ssa.MoveSize(t.Alignment(), config) && ssa.LogLargeCopyValue(v, s)) {
+		if !(s > 3*8*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 < 23 && ssa.LogLargeCopyValue(v, s)) {
 			break
 		}
 		v.Reset(ssaop.OpRISCV64LoweredMoveLoop)
+		v.AuxInt = ssa.Int64ToAuxInt(s)
+		v.Aux = ssa.Int64ToAux(t.Alignment())
+		v.AddArg3(dst, src, mem)
+		return true
+	}
+	// match: (Move [s] {t} dst src mem)
+	// cond: s > 3*8*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 >= 23 && ssa.LogLargeCopyValue(v, s)
+	// result: (LoweredMoveLoopV [s] {t.Alignment()} dst src mem)
+	for {
+		s := ssa.AuxIntToInt64(v.AuxInt)
+		t := ssa.AuxToType(v.Aux)
+		dst := v_0
+		src := v_1
+		mem := v_2
+		if !(s > 3*8*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 >= 23 && ssa.LogLargeCopyValue(v, s)) {
+			break
+		}
+		v.Reset(ssaop.OpRISCV64LoweredMoveLoopV)
 		v.AuxInt = ssa.Int64ToAuxInt(s)
 		v.Aux = ssa.Int64ToAux(t.Alignment())
 		v.AddArg3(dst, src, mem)

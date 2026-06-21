@@ -410,6 +410,37 @@ func init() {
 			faultOnNilArg1: true,
 			addrSinkArg0:   true,
 			addrSinkArg1:   true,
+			// We dont save RVV in async preemption yet
+			// so mark this as an unsafe point.
+			unsafePoint: true,
+		},
+
+		// general RVV unaligned move for rva23u64 and later
+		// arg0 = address of dst memory (clobber)
+		// arg1 = address of src memory (clobber)
+		// arg2 = mem
+		// auxint = size
+		// aux = alignment (as an int64)
+		// returns mem
+		// Uses RVV V24-V31, which are not allocated by SSA
+		// We dont save RVV in async preemption yet
+		// so mark this as an unsafe point.
+		{
+			name:        "LoweredMoveLoopV",
+			aux:         "SizeAndAlign",
+			typ:         "Mem",
+			argLength:   3,
+			unsafePoint: true,
+			reg: regInfo{
+				inputs:       []regMask{gpMask.minus(r5toR6), gpMask.minus(r5toR6)},
+				clobbers:     r5toR6,
+				clobbersArg0: true,
+				clobbersArg1: true,
+			},
+			faultOnNilArg0: true,
+			faultOnNilArg1: true,
+			addrSinkArg0:   true,
+			addrSinkArg1:   true,
 		},
 
 		// Atomic loads.
