@@ -986,7 +986,10 @@ func genPPC64(g *gen) {
 }
 
 func genRISCV64(g *gen) {
-	p := g.p
+	p, label := g.p, g.label
+
+	const xReg = "X25"      // *xRegState scratch register
+	const strideReg = "X28" // vector group stride (8*VLENB), recomputed per block
 
 	// X0 (zero), X1 (LR), X2 (SP), X3 (GP), X4 (TP), X27 (g), X31 (TMP) are special.
 	var l = layout{sp: "X2", stack: 8}
@@ -1006,10 +1009,96 @@ func genRISCV64(g *gen) {
 		l.add("MOVD", reg, 8)
 	}
 
+	// Reserve stack slots for the vector CSRs (vstart, vtype, vl, vcsr)
+	vstartOff := l.stack
+	vtypeOff := l.stack + 8
+	vlOff := l.stack + 16
+	vcsrOff := l.stack + 24
+	l.stack += 4 * 8
+
+	// Emit preempt_riscv64.go. Unlike the fixed-width architectures there is no
+	// fixed xRegs type: the save area is 32 vector registers, each VLENB bytes
+	// wide, sized at runtime from the detected hardware vector length (0 when V
+	// is absent). The block is allocated from a fixalloc pool, so its size is
+	// bounded (see preempt_xreg.go for the limit).
+	// Every byte of the vector registers may hold a pointer, so the whole area is
+	// conservatively scanned (scan == size).
+	writeXRegs(g.goarch, nil, []string{"internal/cpu"}, "size = 32 * uintptr(cpu.RISCV64.VLENB)\n\treturn size, size")
+
+	// The vector registers are saved with whole-register stores that operate on
+	// groups of 8 registers (VS8RV/VL8RE8V), each transferring the real runtime
+	// VLENB bytes per register. The distance between groups is therefore
+	// 8*VLENB, computed at runtime into strideReg rather than baked in, so the
+	// save area is exactly 32*VLENB bytes.
+
 	p("MOV X1, -%d(X2)", l.stack)
 	p("SUB $%d, X2", l.stack)
+	p("// Save GPs and FPs")
 	l.save(g)
+
+	p("MOV internal∕cpu·RISCV64+const_offsetRISCV64HasV(SB), X5")
+	p("BEQZ X5, nosaveVec")
+	p("MOV g_m(g), %s", xReg)
+	p("MOV m_p(%s), %s", xReg, xReg)
+	p("MOV (p_xRegs+xRegPerP_scratch)(%s), %s", xReg, xReg)
+	// Read the vector CSRs before the whole-register stores. Every vector
+	// instruction resets vstart to zero on completion, so vstart must be
+	// captured first; a whole-register store would otherwise clear it before it
+	// is read. After capturing, vstart is explicitly cleared so the stores below
+	// transfer all elements starting from element 0 (a store begins at vstart
+	// and leaves earlier elements of the destination untouched). This mirrors
+	// the Linux kernel's __riscv_v_vstate_save.
+	p("CSRR VSTART, X5")
+	p("MOV X5, %d(X2)", vstartOff)
+	p("CSRR VTYPE, X5")
+	p("MOV X5, %d(X2)", vtypeOff)
+	p("CSRR VL, X5")
+	p("MOV X5, %d(X2)", vlOff)
+	p("CSRR VCSR, X5")
+	p("MOV X5, %d(X2)", vcsrOff)
+	p("CSRW $0, VSTART")
+	// stride = 8*VLENB (8 registers per group * VLENB bytes/register), the byte
+	// distance between whole-register groups.
+	p("CSRR VLENB, %s", strideReg)
+	p("SLLI $3, %s, %s", strideReg, strideReg)
+	p("VS8RV V0, (%s)", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VS8RV V8, (%s)", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VS8RV V16, (%s)", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VS8RV V24, (%s)", xReg)
+	label("nosaveVec:")
+
 	p("CALL ·asyncPreempt2(SB)")
+
+	p("MOV internal∕cpu·RISCV64+const_offsetRISCV64HasV(SB), X5")
+	p("BEQZ X5, norestoreVec")
+	p("MOV g_m(g), %s", xReg)
+	p("MOV m_p(%s), %s", xReg, xReg)
+	p("MOV (p_xRegs+xRegPerP_cache)(%s), %s", xReg, xReg)
+	// strideReg = 8*VLENB. It is clobbered below by VSETVL (as rd), but the
+	// whole-register loads that need it all run first.
+	p("CSRR VLENB, %s", strideReg)
+	p("SLLI $3, %s, %s", strideReg, strideReg)
+	p("VL8RE8V (%s), V0", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VL8RE8V (%s), V8", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VL8RE8V (%s), V16", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VL8RE8V (%s), V24", xReg)
+	// Restore vl and vtype together via vsetvl
+	p("MOV %d(X2), X6", vtypeOff)
+	p("MOV %d(X2), X7", vlOff)
+	p("VSETVL X6, X7, X28")
+	p("MOV %d(X2), X5", vstartOff)
+	p("CSRW X5, VSTART")
+	p("MOV %d(X2), X5", vcsrOff)
+	p("CSRW X5, VCSR")
+	label("norestoreVec:")
+
+	p("// Restore GPs and FPs")
 	l.restore(g)
 	p("MOV %d(X2), X1", l.stack)
 	p("MOV (X2), X31")

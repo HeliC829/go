@@ -4,8 +4,9 @@
 #include "textflag.h"
 
 TEXT ·asyncPreempt(SB),NOSPLIT|NOFRAME,$0-0
-	MOV X1, -464(X2)
-	SUB $464, X2
+	MOV X1, -496(X2)
+	SUB $496, X2
+	// Save GPs and FPs
 	MOV X5, 8(X2)
 	MOV X6, 16(X2)
 	MOV X7, 24(X2)
@@ -63,7 +64,54 @@ TEXT ·asyncPreempt(SB),NOSPLIT|NOFRAME,$0-0
 	MOVD F29, 440(X2)
 	MOVD F30, 448(X2)
 	MOVD F31, 456(X2)
+	MOV internal∕cpu·RISCV64+const_offsetRISCV64HasV(SB), X5
+	BEQZ X5, nosaveVec
+	MOV g_m(g), X25
+	MOV m_p(X25), X25
+	MOV (p_xRegs+xRegPerP_scratch)(X25), X25
+	CSRR VSTART, X5
+	MOV X5, 464(X2)
+	CSRR VTYPE, X5
+	MOV X5, 472(X2)
+	CSRR VL, X5
+	MOV X5, 480(X2)
+	CSRR VCSR, X5
+	MOV X5, 488(X2)
+	CSRW $0, VSTART
+	CSRR VLENB, X28
+	SLLI $3, X28, X28
+	VS8RV V0, (X25)
+	ADD X28, X25
+	VS8RV V8, (X25)
+	ADD X28, X25
+	VS8RV V16, (X25)
+	ADD X28, X25
+	VS8RV V24, (X25)
+nosaveVec:
 	CALL ·asyncPreempt2(SB)
+	MOV internal∕cpu·RISCV64+const_offsetRISCV64HasV(SB), X5
+	BEQZ X5, norestoreVec
+	MOV g_m(g), X25
+	MOV m_p(X25), X25
+	MOV (p_xRegs+xRegPerP_cache)(X25), X25
+	CSRR VLENB, X28
+	SLLI $3, X28, X28
+	VL8RE8V (X25), V0
+	ADD X28, X25
+	VL8RE8V (X25), V8
+	ADD X28, X25
+	VL8RE8V (X25), V16
+	ADD X28, X25
+	VL8RE8V (X25), V24
+	MOV 472(X2), X6
+	MOV 480(X2), X7
+	VSETVL X6, X7, X28
+	MOV 464(X2), X5
+	CSRW X5, VSTART
+	MOV 488(X2), X5
+	CSRW X5, VCSR
+norestoreVec:
+	// Restore GPs and FPs
 	MOVD 456(X2), F31
 	MOVD 448(X2), F30
 	MOVD 440(X2), F29
@@ -121,7 +169,7 @@ TEXT ·asyncPreempt(SB),NOSPLIT|NOFRAME,$0-0
 	MOV 24(X2), X7
 	MOV 16(X2), X6
 	MOV 8(X2), X5
-	MOV 464(X2), X1
+	MOV 496(X2), X1
 	MOV (X2), X31
-	ADD $472, X2
+	ADD $504, X2
 	JMP (X31)
