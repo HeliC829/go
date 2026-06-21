@@ -1042,7 +1042,10 @@ func genPPC64(g *gen) {
 }
 
 func genRISCV64(g *gen) {
-	p := g.p
+	p, label := g.p, g.label
+
+	const xReg = "X25"      // *xRegState scratch register
+	const strideReg = "X28" // 8*VLENB, the size of a group of 8 vector registers
 
 	// X0 (zero), X1 (LR), X2 (SP), X3 (GP), X4 (TP), X27 (g), X31 (TMP) are special.
 	var l = layout{sp: "X2", stack: 8}
@@ -1062,10 +1065,87 @@ func genRISCV64(g *gen) {
 		l.add("MOVD", reg, 8)
 	}
 
+	// Stack slots for vstart, vtype, vl and vcsr.
+	vstartOff := l.stack
+	vtypeOff := l.stack + 8
+	vlOff := l.stack + 16
+	vcsrOff := l.stack + 24
+	l.stack += 4 * 8
+
+	// Room for 32 registers of up to VLENB 128 (VLEN 1024), stored back to
+	// back with a stride of VLENB. Only needed with the SIMD experiment.
+	var lVRegs layout
+	lVRegs.add("", "V", 32*128)
+	writeXRegs(g.goarch, &lVRegs)
+
 	p("MOV X1, -%d(X2)", l.stack)
 	p("SUB $%d, X2", l.stack)
+	p("// Save GPs and FPs")
 	l.save(g)
+
+	p("#ifdef GOEXPERIMENT_simd")
+	p("MOVBU internal∕cpu·RISCV64+const_offsetRISCV64HasV(SB), X5")
+	p("BEQZ X5, nosaveVec")
+	// Like SVE with VL > 32, registers wider than xRegs allows are skipped.
+	p("CSRR VLENB, %s", strideReg)
+	p("MOV $128, X5")
+	p("BLTU X5, %s, nosaveVec", strideReg)
+	p("MOV g_m(g), %s", xReg)
+	p("MOV m_p(%s), %s", xReg, xReg)
+	p("ADD $(p_xRegs+xRegPerP_scratch), %s, %s", xReg, xReg)
+	// Read vstart before any vector instruction resets it, then clear it so
+	// the stores below start at element 0.
+	p("CSRR VSTART, X5")
+	p("MOV X5, %d(X2)", vstartOff)
+	p("CSRR VTYPE, X5")
+	p("MOV X5, %d(X2)", vtypeOff)
+	p("CSRR VL, X5")
+	p("MOV X5, %d(X2)", vlOff)
+	p("CSRR VCSR, X5")
+	p("MOV X5, %d(X2)", vcsrOff)
+	p("CSRW $0, VSTART")
+	p("SLLI $3, %s, %s", strideReg, strideReg)
+	p("VS8RV V0, (%s)", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VS8RV V8, (%s)", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VS8RV V16, (%s)", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VS8RV V24, (%s)", xReg)
+	label("nosaveVec:")
+	p("#endif")
+
 	p("CALL ·asyncPreempt2(SB)")
+
+	p("#ifdef GOEXPERIMENT_simd")
+	p("MOVBU internal∕cpu·RISCV64+const_offsetRISCV64HasV(SB), X5")
+	p("BEQZ X5, norestoreVec")
+	p("CSRR VLENB, %s", strideReg)
+	p("MOV $128, X5")
+	p("BLTU X5, %s, norestoreVec", strideReg)
+	p("MOV g_m(g), %s", xReg)
+	p("MOV m_p(%s), %s", xReg, xReg)
+	p("MOV (p_xRegs+xRegPerP_cache)(%s), %s", xReg, xReg)
+	p("SLLI $3, %s, %s", strideReg, strideReg)
+	p("VL8RE8V (%s), V0", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VL8RE8V (%s), V8", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VL8RE8V (%s), V16", xReg)
+	p("ADD %s, %s", strideReg, xReg)
+	p("VL8RE8V (%s), V24", xReg)
+	// Restore vl and vtype, then vstart last, since vsetvl resets it.
+	p("MOV %d(X2), X6", vtypeOff)
+	p("MOV %d(X2), X7", vlOff)
+	p("VSETVL X6, X7, X0")
+	p("MOV %d(X2), X5", vstartOff)
+	p("CSRW X5, VSTART")
+	p("MOV %d(X2), X5", vcsrOff)
+	p("CSRW X5, VCSR")
+	label("norestoreVec:")
+	p("#endif")
+
+	p("// Restore GPs and FPs")
 	l.restore(g)
 	p("MOV %d(X2), X1", l.stack)
 	p("MOV (X2), X31")

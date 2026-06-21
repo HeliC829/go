@@ -21,6 +21,8 @@ const (
 
 	offsetMIPS64XHasMSA = unsafe.Offsetof(cpu.MIPS64X.HasMSA)
 
+	offsetRISCV64HasV = unsafe.Offsetof(cpu.RISCV64.HasV)
+
 	offsetLOONG64HasLSX  = unsafe.Offsetof(cpu.Loong64.HasLSX)
 	offsetLOONG64HasLASX = unsafe.Offsetof(cpu.Loong64.HasLASX)
 	offsetARM64HasSVE    = unsafe.Offsetof(cpu.ARM64.HasSVE)
