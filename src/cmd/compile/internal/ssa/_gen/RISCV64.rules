@@ -455,8 +455,11 @@
 
 // Generic move uses a loop
 (Move [s] {t} dst src mem) && s > 3*8*ssa.MoveSize(t.Alignment(), config)
-	&& ssa.LogLargeCopyValue(v, s) =>
+	&& buildcfg.GORISCV64 < 23 && ssa.LogLargeCopyValue(v, s) =>
 	(LoweredMoveLoop [s] {t.Alignment()} dst src mem)
+(Move [s] {t} dst src mem) && s > 3*8*ssa.MoveSize(t.Alignment(), config)
+	&& buildcfg.GORISCV64 >= 23 && ssa.LogLargeCopyValue(v, s) =>
+	(LoweredMoveLoopV [s] {t.Alignment()} dst src mem)
 
 // Boolean ops; 0=false, 1=true
 (AndB ...) => (AND ...)

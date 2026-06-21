@@ -6061,6 +6061,7 @@ const (
 	OpRISCV64LoweredZeroLoopV
 	OpRISCV64LoweredMove
 	OpRISCV64LoweredMoveLoop
+	OpRISCV64LoweredMoveLoopV
 	OpRISCV64LoweredAtomicLoad8
 	OpRISCV64LoweredAtomicLoad32
 	OpRISCV64LoweredAtomicLoad64
@@ -100797,6 +100798,26 @@ var OpcodeTable = [...]OpInfo{
 		FaultOnNilArg1: true,
 		AddrSinkArg0:   true,
 		AddrSinkArg1:   true,
+		unsafePoint:    true,
+		Reg: RegInfo{
+			Inputs: []InputInfo{
+				{0, RegMask{V1: 1006632896, V2: 0}}, // X7 X8 X9 X10 X11 X12 X13 X14 X15 X16 X17 X18 X19 X20 X21 X22 X23 X24 X25 X26 X28 X29 X30
+				{1, RegMask{V1: 1006632896, V2: 0}}, // X7 X8 X9 X10 X11 X12 X13 X14 X15 X16 X17 X18 X19 X20 X21 X22 X23 X24 X25 X26 X28 X29 X30
+			},
+			Clobbers:     RegMask{V1: 48, V2: 0}, // X5 X6
+			ClobbersArg0: true,
+			ClobbersArg1: true,
+		},
+	},
+	{
+		Name:           "LoweredMoveLoopV",
+		AuxType:        AuxTypeSizeAndAlign,
+		ArgLen:         3,
+		FaultOnNilArg0: true,
+		FaultOnNilArg1: true,
+		AddrSinkArg0:   true,
+		AddrSinkArg1:   true,
+		unsafePoint:    true,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 1006632896, V2: 0}}, // X7 X8 X9 X10 X11 X12 X13 X14 X15 X16 X17 X18 X19 X20 X21 X22 X23 X24 X25 X26 X28 X29 X30
