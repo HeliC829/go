@@ -152,34 +152,56 @@ func (g *gen) label(l string) {
 	fmt.Fprintf(g.w, "%s\n", l)
 }
 
-// writeXRegs writes an architecture xregs file.
-func writeXRegs(arch string, l *layout) {
+// writeXRegs writes the generated preempt_GOARCH.go file.
+// xRegStateSize returns the total save-area size and the leading prefix that
+// may contain pointers and must be scanned. Architectures must place
+// pointer-capable registers first and return scan <= size.
+//
+// If l is non-nil, writeXRegs also generates the fixed-width xRegs type.
+// sizeBody may compute sizes from CPU information detected at startup.
+// The total size must fit in _FixAllocChunk.
+func writeXRegs(arch string, l *layout, imports []string, sizeBody string) {
 	var code bytes.Buffer
 	g := gen{&code, arch}
 	g.commonHeader()
 	fmt.Fprintf(g.w, `
 package runtime
-
+`)
+	if len(imports) == 1 {
+		fmt.Fprintf(g.w, `
+import %q
+`, imports[0])
+	} else if len(imports) > 1 {
+		fmt.Fprintf(g.w, "\nimport (\n")
+		for _, imp := range imports {
+			fmt.Fprintf(g.w, "\t%q\n", imp)
+		}
+		fmt.Fprintf(g.w, ")\n")
+	}
+	if l != nil {
+		fmt.Fprintf(g.w, `
 type xRegs struct {
 `)
-	pos := 0
-	for _, seq := range l.regs {
-		for _, r := range seq.regs {
-			if r.pos != pos && !seq.fixedOffset {
-				log.Fatalf("padding not implemented")
+		pos := 0
+		for _, seq := range l.regs {
+			for _, r := range seq.regs {
+				if r.pos != pos && !seq.fixedOffset {
+					log.Fatalf("padding not implemented")
+				}
+				typ := fmt.Sprintf("[%d]byte", r.size)
+				switch {
+				case r.size == 4 && r.pos%4 == 0:
+					typ = "uint32"
+				case r.size == 8 && r.pos%8 == 0:
+					typ = "uint64"
+				}
+				fmt.Fprintf(g.w, "\t%s %s\n", r.name, typ)
+				pos += r.size
 			}
-			typ := fmt.Sprintf("[%d]byte", r.size)
-			switch {
-			case r.size == 4 && r.pos%4 == 0:
-				typ = "uint32"
-			case r.size == 8 && r.pos%8 == 0:
-				typ = "uint64"
-			}
-			fmt.Fprintf(g.w, "\t%s %s\n", r.name, typ)
-			pos += r.size
 		}
+		fmt.Fprintf(g.w, "}\n")
 	}
-	fmt.Fprintf(g.w, "}\n")
+	fmt.Fprintf(g.w, "\nfunc xRegStateSize() (size, scan uintptr) {\n\t%s\n}\n", sizeBody)
 
 	path := fmt.Sprintf("preempt_%s.go", arch)
 	b, err := format.Source(code.Bytes())
@@ -428,7 +450,7 @@ func genAMD64(g *gen) {
 		}
 
 	}
-	writeXRegs(g.goarch, &lZRegs)
+	writeXRegs(g.goarch, &lZRegs, []string{"unsafe"}, "size = unsafe.Sizeof(xRegs{})\n\treturn size, size")
 
 	p("PUSHQ BP")
 	p("MOVQ SP, BP")
@@ -455,7 +477,7 @@ func genAMD64(g *gen) {
 	p("MOVQ g(CX), R14")
 	p("MOVQ g_m(R14), %s", xReg)
 	p("MOVQ m_p(%s), %s", xReg, xReg)
-	p("LEAQ (p_xRegs+xRegPerP_scratch)(%s), %s", xReg, xReg)
+	p("MOVQ (p_xRegs+xRegPerP_scratch)(%s), %s", xReg, xReg)
 
 	// Which registers do we need to save?
 	p("#ifdef GOEXPERIMENT_simd")
@@ -611,7 +633,7 @@ func genARM64(g *gen) {
 		regs := []regInfo{{name: fmt.Sprintf("P%d", i), size: 8}}
 		lAll.add2("PSTR", "PLDR", regs, [2]string{"", ""}, false)
 	}
-	writeXRegs(g.goarch, &lAll)
+	writeXRegs(g.goarch, &lAll, []string{"unsafe"}, "size = unsafe.Sizeof(xRegs{})\n\treturn size, size")
 	if l.stack%16 != 0 {
 		l.stack += 8 // SP needs 16-byte alignment
 	}
@@ -633,7 +655,7 @@ func genARM64(g *gen) {
 	p("// Save extended register state to p.xRegs.scratch")
 	p("MOVD g_m(g), %s", vReg)
 	p("MOVD m_p(%s), %s", vReg, vReg)
-	p("ADD $(p_xRegs+xRegPerP_scratch), %s, %s", vReg, vReg)
+	p("MOVD (p_xRegs+xRegPerP_scratch)(%s), %s", vReg, vReg)
 	p("#ifdef GOEXPERIMENT_simd")
 	p("MOVBU internal∕cpu·ARM64+const_offsetARM64HasSVE(SB), R27")
 	p("CMP $1, R27")
@@ -840,7 +862,7 @@ func genLoong64(g *gen) {
 			fpRegs.regs[i].regs[j].pos = lasxRegs.regs[i].regs[j].pos
 		}
 	}
-	writeXRegs(g.goarch, &lasxRegs)
+	writeXRegs(g.goarch, &lasxRegs, []string{"unsafe"}, "size = unsafe.Sizeof(xRegs{})\n\treturn size, size")
 
 	// allocate frame, save PC of interrupted instruction (in LR)
 	p(mov+" R1, -%d(R3)", l.stack)
@@ -852,7 +874,7 @@ func genLoong64(g *gen) {
 	p("// Save extended register state to p.xRegs.scratch")
 	p("MOVV g_m(g), %s", xReg)
 	p("MOVV m_p(%s), %s", xReg, xReg)
-	p("ADDV $(p_xRegs+xRegPerP_scratch), %s, %s", xReg, xReg)
+	p("MOVV (p_xRegs+xRegPerP_scratch)(%s), %s", xReg, xReg)
 
 	p("MOVBU internal∕cpu·Loong64+const_offsetLOONG64HasLASX(SB), R5")
 	p("BNE R5, saveLASX")

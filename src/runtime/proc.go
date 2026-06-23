@@ -889,6 +889,7 @@ func schedinit() {
 	randinit() // must run before mallocinit, AlgInit, mcommoninit
 	mallocinit()
 	cpuinit(godebug) // must run before AlgInit
+	xRegInitAlloc()  // must run after cpuinit and before procresize
 	maps.AlgInit()   // maps, hash, rand must not be used before this call
 	mcommoninit(gp.m, -1)
 	modulesinit()   // provides activeModules
@@ -5983,6 +5984,9 @@ func (pp *p) init(id int32) {
 		}
 	}
 	lockInit(&pp.timers.mu, lockRankTimers)
+
+	// Allocate per-P extended-register scratch after its size is known.
+	pp.xRegs.init()
 
 	// This P may get timers when it starts running. Set the mask here
 	// since the P may not go through pidleget (notably P 0 on startup).

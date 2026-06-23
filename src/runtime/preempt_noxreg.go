@@ -19,6 +19,8 @@ type xRegState struct{}
 
 func xRegInitAlloc() {}
 
+func (*xRegPerP) init() {}
+
 func xRegSave(gp *g) {}
 
 //go:nosplit

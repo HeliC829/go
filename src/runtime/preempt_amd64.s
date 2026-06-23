@@ -35,7 +35,7 @@ TEXT ·asyncPreempt(SB),NOSPLIT|NOFRAME,$0-0
 	MOVQ g(CX), R14
 	MOVQ g_m(R14), AX
 	MOVQ m_p(AX), AX
-	LEAQ (p_xRegs+xRegPerP_scratch)(AX), AX
+	MOVQ (p_xRegs+xRegPerP_scratch)(AX), AX
 	#ifdef GOEXPERIMENT_simd
 	CMPB internal∕cpu·X86+const_offsetX86HasAVX512(SB), $1
 	JE saveAVX512

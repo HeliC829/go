@@ -55,7 +55,7 @@ TEXT ·asyncPreempt(SB),NOSPLIT|NOFRAME,$0-0
 	// Save extended register state to p.xRegs.scratch
 	MOVV g_m(g), R4
 	MOVV m_p(R4), R4
-	ADDV $(p_xRegs+xRegPerP_scratch), R4, R4
+	MOVV (p_xRegs+xRegPerP_scratch)(R4), R4
 	MOVBU internal∕cpu·Loong64+const_offsetLOONG64HasLASX(SB), R5
 	BNE R5, saveLASX
 	MOVBU internal∕cpu·Loong64+const_offsetLOONG64HasLSX(SB), R5

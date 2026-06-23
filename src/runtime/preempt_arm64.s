@@ -32,7 +32,7 @@ TEXT ·asyncPreempt(SB),NOSPLIT|NOFRAME,$0-0
 	// Save extended register state to p.xRegs.scratch
 	MOVD g_m(g), R0
 	MOVD m_p(R0), R0
-	ADD $(p_xRegs+xRegPerP_scratch), R0, R0
+	MOVD (p_xRegs+xRegPerP_scratch)(R0), R0
 	#ifdef GOEXPERIMENT_simd
 	MOVBU internal∕cpu·ARM64+const_offsetARM64HasSVE(SB), R27
 	CMP $1, R27

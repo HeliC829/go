@@ -2,6 +2,8 @@
 
 package runtime
 
+import "unsafe"
+
 type xRegs struct {
 	X0  [32]byte
 	X1  [32]byte
@@ -35,4 +37,9 @@ type xRegs struct {
 	X29 [32]byte
 	X30 [32]byte
 	X31 [32]byte
+}
+
+func xRegStateSize() (size, scan uintptr) {
+	size = unsafe.Sizeof(xRegs{})
+	return size, size
 }
