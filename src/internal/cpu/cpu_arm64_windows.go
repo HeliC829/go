@@ -23,4 +23,10 @@ func osInit() {
 	ARM64.HasCRC32 = isProcessorFeaturePresent(_PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE)
 	ARM64.HasSHA512 = isProcessorFeaturePresent(_PF_ARM_SHA512_INSTRUCTIONS_AVAILABLE)
 	ARM64.HasATOMICS = isProcessorFeaturePresent(_PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE)
+
+	// SVE is supported for native arm64 processes since Windows 11 24H2.
+	ARM64.HasSVE = isProcessorFeaturePresent(_PF_ARM_SVE_INSTRUCTIONS_AVAILABLE)
+	if ARM64.HasSVE {
+		ARM64.SVEVLB = uint(getSVEVL())
+	}
 }

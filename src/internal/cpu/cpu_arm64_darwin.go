@@ -20,6 +20,11 @@ func osInit() {
 
 	ARM64.HasSB = sysctlEnabled([]byte("hw.optional.arm.FEAT_SB\x00"))
 
+	ARM64.HasSVE = sysctlEnabled([]byte("hw.optional.arm.FEAT_SVE\x00"))
+	if ARM64.HasSVE {
+		ARM64.SVEVLB = uint(getSVEVL())
+	}
+
 	// There are no hw.optional sysctl values for the below features on macOS 11
 	// to detect their supported state dynamically (although they are available
 	// in the hw.optional.arm tree on macOS 12). Assume the CPU features that

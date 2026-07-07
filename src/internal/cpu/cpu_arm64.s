@@ -30,3 +30,17 @@ TEXT ·getMIDR(SB), NOSPLIT, $0-8
 	MRS	MIDR_EL1, R0
 	MOVD	R0, ret+0(FP)
 	RET
+
+// func getSVEVL() uint64
+// Returns the SVE vector length in bytes, or 0 when built without
+// GOEXPERIMENT=simd: the assembler only accepts the SVE RDVL instruction under
+// that experiment, which is also the only configuration where SVEVLB is used.
+// Only can be called when SVE is present.
+TEXT ·getSVEVL(SB), NOSPLIT, $0-8
+#ifdef GOEXPERIMENT_simd
+	RDVL	$1, R0 // vector length in bytes
+#else
+	MOVD	$0, R0
+#endif
+	MOVD	R0, ret+0(FP)
+	RET

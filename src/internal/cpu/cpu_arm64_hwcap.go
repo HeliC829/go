@@ -55,6 +55,13 @@ func hwcapInit(os string) {
 	ARM64.HasSB = isSet(HWCap, hwcap_SB)
 	ARM64.HasSVE = isSet(HWCap, hwcap_SVE)
 
+	// getSVEVL reads the vector length with RDVL, which is only assembled
+	// under GOEXPERIMENT=simd and returns 0 otherwise.
+	ARM64.HasSVE = isSet(HWCap, hwcap_SVE)
+	if ARM64.HasSVE {
+		ARM64.SVEVLB = uint(getSVEVL())
+	}
+
 	// The Samsung S9+ kernel reports support for atomics, but not all cores
 	// actually support them, resulting in SIGILL. See issue #28431.
 	// TODO(elias.naur): Only disable the optimization on bad chipsets on android.

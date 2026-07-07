@@ -86,8 +86,9 @@ var ARM64 struct {
 	HasCPUID   bool
 	HasDIT     bool
 	HasSB      bool
+	HasSVE     bool // Scalable Vector Extension
 	IsNeoverse bool
-	HasSVE     bool
+	SVEVLB     uint // SVEVLB is the SVE vector length in bytes. 0 when HasSVE is false or GOEXPERIMENT=simd is disabled.
 	_          CacheLinePad
 }
 

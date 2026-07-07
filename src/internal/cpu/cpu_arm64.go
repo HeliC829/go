@@ -35,6 +35,8 @@ func getpfr0() uint64
 
 func getMIDR() uint64
 
+func getSVEVL() uint64
+
 func extractBits(data uint64, start, end uint) uint {
 	return (uint)(data>>start) & ((1 << (end - start + 1)) - 1)
 }
@@ -83,9 +85,14 @@ func parseARM64SystemRegisters(isar0, isa1, pfr0 uint64) {
 		ARM64.HasSB = true
 	}
 
+	// ID_AA64PFR0_EL1
+	// https://developer.arm.com/documentation/ddi0601/2025-03/AArch64-Registers/ID-AA64PFR0-EL1--AArch64-Processor-Feature-Register-0
 	switch extractBits(pfr0, 32, 35) {
 	case 1, 2:
 		ARM64.HasSVE = true
+		// The OS reported SVE support above, so executing an SVE
+		// instruction to read the vector length is safe here.
+		ARM64.SVEVLB = uint(getSVEVL())
 	}
 
 	switch extractBits(pfr0, 48, 51) {
