@@ -25,6 +25,11 @@ func doinit() {
 
 	// arm64 uses different ways to detect CPU features at runtime depending on the operating system.
 	osInit()
+	if ARM64.HasSVE {
+		// The OS reported SVE support above, so executing an SVE
+		// instruction to read the vector length is safe here.
+		ARM64.SVEVLB = uint(getSVEVL())
+	}
 }
 
 func getisar0() uint64
@@ -34,6 +39,8 @@ func getisar1() uint64
 func getpfr0() uint64
 
 func getMIDR() uint64
+
+func getSVEVL() uint64
 
 func extractBits(data uint64, start, end uint) uint {
 	return (uint)(data>>start) & ((1 << (end - start + 1)) - 1)

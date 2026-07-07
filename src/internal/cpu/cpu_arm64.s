@@ -30,3 +30,11 @@ TEXT ·getMIDR(SB), NOSPLIT, $0-8
 	MRS	MIDR_EL1, R0
 	MOVD	R0, ret+0(FP)
 	RET
+
+// Returns the SVE vector length in bytes
+// May only be called when SVE is present.
+// func getSVEVL() uint64
+TEXT ·getSVEVL(SB), NOSPLIT, $0-8
+	RDVL	$1, R0 // vector length in bytes
+	MOVD	R0, ret+0(FP)
+	RET

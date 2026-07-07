@@ -89,6 +89,7 @@ var ARM64 struct {
 	IsNeoverse bool
 	HasSVE     bool
 	HasSVE2    bool
+	SVEVLB     uint // SVE vector length in bytes. 0 when HasSVE is false or GOEXPERIMENT=simd is disabled.
 	_          CacheLinePad
 }
 
