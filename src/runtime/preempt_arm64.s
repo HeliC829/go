@@ -37,9 +37,6 @@ TEXT ·asyncPreempt(SB),NOSPLIT|NOFRAME,$0-0
 	MOVBU internal∕cpu·ARM64+const_offsetARM64HasSVE(SB), R27
 	CMP $1, R27
 	BNE saveNEON
-	RDVL $1, R27
-	CMP $32, R27
-	BGT saveNEON
 	ZSTR Z0, (VL*0)(R0)
 	ZSTR Z1, (VL*1)(R0)
 	ZSTR Z2, (VL*2)(R0)
@@ -91,6 +88,8 @@ TEXT ·asyncPreempt(SB),NOSPLIT|NOFRAME,$0-0
 	PSTR P13, (VL*13)(R27)
 	PSTR P14, (VL*14)(R27)
 	PSTR P15, (VL*15)(R27)
+	PRDFFR P0.B
+	PSTR P0, (VL*16)(R27)
 	JMP preempt
 	#endif
 saveNEON:
@@ -112,9 +111,6 @@ preempt:
 	MOVBU internal∕cpu·ARM64+const_offsetARM64HasSVE(SB), R27
 	CMP $1, R27
 	BNE restoreNEON
-	RDVL $1, R27
-	CMP $32, R27
-	BGT restoreNEON
 	ZLDR (VL*0)(R0), Z0
 	ZLDR (VL*1)(R0), Z1
 	ZLDR (VL*2)(R0), Z2
@@ -150,6 +146,8 @@ preempt:
 	RDVL $1, R27
 	LSL $5, R27
 	ADD R0, R27
+	PLDR (VL*16)(R27), P0
+	PWRFFR P0.B
 	PLDR (VL*0)(R27), P0
 	PLDR (VL*1)(R27), P1
 	PLDR (VL*2)(R27), P2

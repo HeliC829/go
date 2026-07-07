@@ -621,19 +621,18 @@ func genARM64(g *gen) {
 		}
 		lVRegs.add2("VST1.P", "VLD1.P", regs, [2]string{"[", "]"}, true)
 	}
-
-	// Create a combined layout for struct generation and SVE code generation.
-	var lAll layout
-	lAll.sp = vReg
-	for i := 0; i < 32; i++ {
-		regs := []regInfo{{name: fmt.Sprintf("Z%d", i), size: 32}}
-		lAll.add2("ZSTR", "ZLDR", regs, [2]string{"", ""}, false)
-	}
-	for i := 0; i < 16; i++ {
-		regs := []regInfo{{name: fmt.Sprintf("P%d", i), size: 8}}
-		lAll.add2("PSTR", "PLDR", regs, [2]string{"", ""}, false)
-	}
-	writeXRegs(g.goarch, &lAll, []string{"unsafe"}, "size = unsafe.Sizeof(xRegs{})\n\treturn size, size")
+	// xRegs describes the fixed NEON layout used when SVE is unavailable. The
+	// SVE save area is sized at runtime from the hardware vector length
+	// instead, so it is not described by a Go type. Z registers come first so
+	// the GC scan can stop before the predicate registers and FFR, which
+	// cannot hold Go pointers.
+	writeXRegs(g.goarch, &lVRegs, []string{"internal/cpu", "internal/goexperiment", "unsafe"},
+		"if goexperiment.SIMD && cpu.ARM64.HasSVE {\n"+
+			"\tvl := uintptr(cpu.ARM64.SVEVLB)\n"+
+			"\treturn 32*vl + 17*(vl/8), 32 * vl\n"+
+			"}\n"+
+			"size = unsafe.Sizeof(xRegs{})\n"+
+			"return size, size")
 	if l.stack%16 != 0 {
 		l.stack += 8 // SP needs 16-byte alignment
 	}
@@ -656,13 +655,15 @@ func genARM64(g *gen) {
 	p("MOVD g_m(g), %s", vReg)
 	p("MOVD m_p(%s), %s", vReg, vReg)
 	p("MOVD (p_xRegs+xRegPerP_scratch)(%s), %s", vReg, vReg)
+
+	// Save the full SVE state when available; V_n is the low 128 bits of Z_n.
+	// The save area is sized for the runtime vector length, so there is no
+	// upper bound on VL here. Keep SVE instructions behind the experiment
+	// guard because the assembler rejects them otherwise.
 	p("#ifdef GOEXPERIMENT_simd")
 	p("MOVBU internal∕cpu·ARM64+const_offsetARM64HasSVE(SB), R27")
 	p("CMP $1, R27")
 	p("BNE saveNEON")
-	p("RDVL $1, R27")
-	p("CMP $32, R27")
-	p("BGT saveNEON")
 
 	for i := 0; i < 32; i++ {
 		p("ZSTR Z%d, (VL*%d)(%s)", i, i, vReg)
@@ -673,6 +674,8 @@ func genARM64(g *gen) {
 	for i := 0; i < 16; i++ {
 		p("PSTR P%d, (VL*%d)(R27)", i, i)
 	}
+	p("PRDFFR P0.B")           // read FFR into P0, whose own value is already saved
+	p("PSTR P0, (VL*16)(R27)") // FFR follows the 16 predicates
 	p("JMP preempt")
 	p("#endif")
 
@@ -689,9 +692,6 @@ func genARM64(g *gen) {
 	p("MOVBU internal∕cpu·ARM64+const_offsetARM64HasSVE(SB), R27")
 	p("CMP $1, R27")
 	p("BNE restoreNEON")
-	p("RDVL $1, R27")
-	p("CMP $32, R27")
-	p("BGT restoreNEON")
 
 	for i := 0; i < 32; i++ {
 		p("ZLDR (VL*%d)(%s), Z%d", i, vReg, i)
@@ -699,6 +699,8 @@ func genARM64(g *gen) {
 	p("RDVL $1, R27")
 	p("LSL $5, R27")
 	p("ADD %s, R27", vReg)
+	p("PLDR (VL*16)(R27), P0") // load FFR through P0 before restoring P0 itself
+	p("PWRFFR P0.B")
 	for i := 0; i < 16; i++ {
 		p("PLDR (VL*%d)(R27), P%d", i, i)
 	}
