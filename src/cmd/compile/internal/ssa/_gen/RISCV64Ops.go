@@ -322,8 +322,38 @@ func init() {
 			needIntTemp:    true,
 			faultOnNilArg0: true,
 			addrSinkArg0:   true,
+			// We dont save RVV in async preemption yet
+			// so mark this as an unsafe point.
+			unsafePoint: true,
 			reg: regInfo{
-				inputs:       []regMask{gpMask},
+				// For GORISCV64 < rva23 this lowers to a runtime branch that
+				// uses either an RVV loop (clobbering X5/X6) or the scalar loop
+				// (using the int temp), so reserve X5/X6 like the RVV ops.
+				inputs:       []regMask{gpMask.minus(r5toR6)},
+				clobbers:     r5toR6,
+				clobbersArg0: true,
+			},
+		},
+		// general RVV zeroing for rva23u64 and later
+		// arg0 = address of memory to zero (clobber)
+		// arg1 = mem
+		// auxint = size
+		// aux = alignment (as an int64)
+		// returns mem
+		// Uses RVV V24-V31, which are not allocated by SSA
+		// We dont save RVV in async preemption yet
+		// so mark this as an unsafe point.
+		{
+			name:           "LoweredZeroLoopV",
+			aux:            "SizeAndAlign",
+			typ:            "Mem",
+			argLength:      2,
+			faultOnNilArg0: true,
+			addrSinkArg0:   true,
+			unsafePoint:    true,
+			reg: regInfo{
+				inputs:       []regMask{gpMask.minus(r5toR6)},
+				clobbers:     r5toR6,
 				clobbersArg0: true,
 			},
 		},

@@ -11106,14 +11106,31 @@ func rewriteValue_OpZero(v *ssa.Value) bool {
 		return true
 	}
 	// match: (Zero [s] {t} ptr mem)
-	// cond: s > 24*ssa.MoveSize(t.Alignment(), config)
+	// cond: s > 24*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 >= 23
+	// result: (LoweredZeroLoopV [s] {t.Alignment()} ptr mem)
+	for {
+		s := ssa.AuxIntToInt64(v.AuxInt)
+		t := ssa.AuxToType(v.Aux)
+		ptr := v_0
+		mem := v_1
+		if !(s > 24*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 >= 23) {
+			break
+		}
+		v.Reset(ssaop.OpRISCV64LoweredZeroLoopV)
+		v.AuxInt = ssa.Int64ToAuxInt(s)
+		v.Aux = ssa.Int64ToAux(t.Alignment())
+		v.AddArg2(ptr, mem)
+		return true
+	}
+	// match: (Zero [s] {t} ptr mem)
+	// cond: s > 24*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 < 23
 	// result: (LoweredZeroLoop [s] {t.Alignment()} ptr mem)
 	for {
 		s := ssa.AuxIntToInt64(v.AuxInt)
 		t := ssa.AuxToType(v.Aux)
 		ptr := v_0
 		mem := v_1
-		if !(s > 24*ssa.MoveSize(t.Alignment(), config)) {
+		if !(s > 24*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 < 23) {
 			break
 		}
 		v.Reset(ssaop.OpRISCV64LoweredZeroLoop)

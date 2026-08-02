@@ -381,8 +381,10 @@
 (Zero [s] {t} ptr mem) && s <= 24*ssa.MoveSize(t.Alignment(), config) =>
 	(LoweredZero [s] {t.Alignment()} ptr mem)
 
-// Generic zeroing uses a loop
-(Zero [s] {t} ptr mem) && s > 24*ssa.MoveSize(t.Alignment(), config) =>
+// Generic zeroing uses a loop.
+(Zero [s] {t} ptr mem) && s > 24*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 >= 23 =>
+	(LoweredZeroLoopV [s] {t.Alignment()} ptr mem)
+(Zero [s] {t} ptr mem) && s > 24*ssa.MoveSize(t.Alignment(), config) && buildcfg.GORISCV64 < 23 =>
 	(LoweredZeroLoop [s] {t.Alignment()} ptr mem)
 
 // Checks
@@ -919,4 +921,3 @@
 (MULW x (MOVDconst [c])) && c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64 >= 22 => (SLLIW [ssa.Log64(c/3)] (SH1ADD <x.Type> x x))
 (MULW x (MOVDconst [c])) && c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64 >= 22 => (SLLIW [ssa.Log64(c/5)] (SH2ADD <x.Type> x x))
 (MULW x (MOVDconst [c])) && c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64 >= 22 => (SLLIW [ssa.Log64(c/9)] (SH3ADD <x.Type> x x))
-

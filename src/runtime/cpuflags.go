@@ -44,4 +44,5 @@ var (
 	loong64HasLSX        bool
 
 	riscv64HasZbb bool
+	riscv64HasV   bool
 )
