@@ -9,6 +9,12 @@ func RewriteValue(v *ssa.Value) bool {
 	switch v.Op {
 	case ssaop.OpRISCV64AND:
 		return rewriteValue_OpRISCV64AND(v)
+	case ssaop.OpRISCV64MOVBUreg:
+		return rewriteValue_OpRISCV64MOVBUreg(v)
+	case ssaop.OpRISCV64MOVHUreg:
+		return rewriteValue_OpRISCV64MOVHUreg(v)
+	case ssaop.OpRISCV64MOVWUreg:
+		return rewriteValue_OpRISCV64MOVWUreg(v)
 	case ssaop.OpRISCV64NOT:
 		return rewriteValue_OpRISCV64NOT(v)
 	case ssaop.OpRISCV64OR:
@@ -41,6 +47,51 @@ func rewriteValue_OpRISCV64AND(v *ssa.Value) bool {
 			return true
 		}
 		break
+	}
+	return false
+}
+func rewriteValue_OpRISCV64MOVBUreg(v *ssa.Value) bool {
+	v_0 := v.Args[0]
+	// match: (MOVBUreg x)
+	// cond: ssa.ZeroUpper56Bits(x)
+	// result: x
+	for {
+		x := v_0
+		if !(ssa.ZeroUpper56Bits(x)) {
+			break
+		}
+		v.CopyOf(x)
+		return true
+	}
+	return false
+}
+func rewriteValue_OpRISCV64MOVHUreg(v *ssa.Value) bool {
+	v_0 := v.Args[0]
+	// match: (MOVHUreg x)
+	// cond: ssa.ZeroUpper48Bits(x)
+	// result: x
+	for {
+		x := v_0
+		if !(ssa.ZeroUpper48Bits(x)) {
+			break
+		}
+		v.CopyOf(x)
+		return true
+	}
+	return false
+}
+func rewriteValue_OpRISCV64MOVWUreg(v *ssa.Value) bool {
+	v_0 := v.Args[0]
+	// match: (MOVWUreg x)
+	// cond: ssa.ZeroUpper32Bits(x)
+	// result: x
+	for {
+		x := v_0
+		if !(ssa.ZeroUpper32Bits(x)) {
+			break
+		}
+		v.CopyOf(x)
+		return true
 	}
 	return false
 }
