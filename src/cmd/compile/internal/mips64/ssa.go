@@ -573,9 +573,9 @@ func ssaGenValue(s *ssagen.State, v *ssa.Value) {
 		as := mips.AMOVV
 		switch v.Op {
 		case ssaop.OpMIPS64LoweredAtomicLoad8:
-			as = mips.AMOVB
+			as = mips.AMOVBU
 		case ssaop.OpMIPS64LoweredAtomicLoad32:
-			as = mips.AMOVW
+			as = mips.AMOVWU
 		}
 		s.Prog(mips.ASYNC)
 		p := s.Prog(as)

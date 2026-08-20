@@ -645,6 +645,7 @@ func noZeroExtLoad32(p *uint32) uint64 {
 	// amd64:`MOVL \(` -`MOVL [A-Z][A-Z0-9]*, [A-Z][A-Z0-9]*`
 	// arm64:`MOVWU \(` -"MOVWU R[0-9]+, R[0-9]+" -"MOVD R[0-9]+, R[0-9]+"
 	// loong64:`MOVWU \(` -"MOVWU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
+	// mips64:`MOVWU \(` -"MOVWU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
 	// riscv64:`MOVWU \(` -"MOVWU X[0-9]+, X[0-9]+" -"MOV X[0-9]+, X[0-9]+"
 	return uint64(*p)
 }
@@ -653,6 +654,7 @@ func noZeroExtLoad16(p *uint16) uint64 {
 	// amd64:`MOVWLZX \(` -`MOVWLZX [A-Z][A-Z0-9]*, [A-Z][A-Z0-9]*`
 	// arm64:`MOVHU \(` -"MOVHU R[0-9]+, R[0-9]+" -"MOVD R[0-9]+, R[0-9]+"
 	// loong64:`MOVHU \(` -"MOVHU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
+	// mips64:`MOVHU \(` -"MOVHU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
 	// riscv64:`MOVHU \(` -"MOVHU X[0-9]+, X[0-9]+" -"MOV X[0-9]+, X[0-9]+"
 	return uint64(*p)
 }
@@ -661,6 +663,7 @@ func noZeroExtLoad8(p *uint8) uint64 {
 	// amd64:`MOVBLZX \(` -`MOVBLZX [A-Z][A-Z0-9]*, [A-Z][A-Z0-9]*`
 	// arm64:`MOVBU \(` -"MOVBU R[0-9]+, R[0-9]+" -"MOVD R[0-9]+, R[0-9]+"
 	// loong64:`MOVBU \(` -"MOVBU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
+	// mips64:`MOVBU \(` -"MOVBU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
 	// riscv64:`MOVBU \(` -"MOVBU X[0-9]+, X[0-9]+" -"MOV X[0-9]+, X[0-9]+"
 	return uint64(*p)
 }
@@ -834,6 +837,7 @@ func noZeroExt48MOVBQZX(x uint8) uint64 {
 	// amd64:"MOVBLZX" -"MOVWLZX"
 	// arm64:"MOVBU R[0-9]+, R[0-9]+" -"MOVHU R[0-9]+, R[0-9]+" -"MOVD R[0-9]+, R[0-9]+"
 	// loong64:"MOVBU R[0-9]+, R[0-9]+" -"MOVHU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
+	// mips64:"MOVBU" -"MOVHU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
 	// riscv64:"MOVBU X[0-9]+, X[0-9]+" -"MOVHU X[0-9]+, X[0-9]+" -"MOV X[0-9]+, X[0-9]+"
 	return uint64(uint16(x))
 }
@@ -871,6 +875,7 @@ func noZeroExtMOVLatomicload(p *uint32) uint64 {
 	// amd64:`MOVL \(` -`MOVL [A-Z][A-Z0-9]*, [A-Z][A-Z0-9]*`
 	// arm64:"LDARW" -"MOVWU R[0-9]+, R[0-9]+" -"MOVD R[0-9]+, R[0-9]+"
 	// loong64:"MOVWU" "DBAR" -"MOVWU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
+	// mips64:"MOVWU" "SYNC" -"MOVWU R[0-9]+, R[0-9]+" -"MOVV R[0-9]+, R[0-9]+"
 	return uint64(atomic.LoadUint32(p))
 }
 

@@ -97433,10 +97433,11 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "SGT",
-		ArgLen:  2,
-		EarlyOk: true,
-		asm:     mips.ASGT,
+		Name:          "SGT",
+		ArgLen:        2,
+		EarlyOk:       true,
+		asm:           mips.ASGT,
+		ZeroUpperBits: 56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 234881022, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -97448,11 +97449,12 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "SGTconst",
-		AuxType: AuxTypeInt64,
-		ArgLen:  1,
-		EarlyOk: true,
-		asm:     mips.ASGT,
+		Name:          "SGTconst",
+		AuxType:       AuxTypeInt64,
+		ArgLen:        1,
+		EarlyOk:       true,
+		asm:           mips.ASGT,
+		ZeroUpperBits: 56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 234881022, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -97463,10 +97465,11 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "SGTU",
-		ArgLen:  2,
-		EarlyOk: true,
-		asm:     mips.ASGTU,
+		Name:          "SGTU",
+		ArgLen:        2,
+		EarlyOk:       true,
+		asm:           mips.ASGTU,
+		ZeroUpperBits: 56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 234881022, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -97478,11 +97481,12 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "SGTUconst",
-		AuxType: AuxTypeInt64,
-		ArgLen:  1,
-		EarlyOk: true,
-		asm:     mips.ASGTU,
+		Name:          "SGTUconst",
+		AuxType:       AuxTypeInt64,
+		ArgLen:        1,
+		EarlyOk:       true,
+		asm:           mips.ASGTU,
+		ZeroUpperBits: 56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 234881022, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -97639,6 +97643,7 @@ var OpcodeTable = [...]OpInfo{
 		AddrSinkArg0:   true,
 		symEffect:      SymRead,
 		asm:            mips.AMOVBU,
+		ZeroUpperBits:  56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 1152921504875282430, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 SP g R31 SB
@@ -97673,6 +97678,7 @@ var OpcodeTable = [...]OpInfo{
 		AddrSinkArg0:   true,
 		symEffect:      SymRead,
 		asm:            mips.AMOVHU,
+		ZeroUpperBits:  48,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 1152921504875282430, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 SP g R31 SB
@@ -97707,6 +97713,7 @@ var OpcodeTable = [...]OpInfo{
 		AddrSinkArg0:   true,
 		symEffect:      SymRead,
 		asm:            mips.AMOVWU,
+		ZeroUpperBits:  32,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 1152921504875282430, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 SP g R31 SB
@@ -97858,12 +97865,13 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:      "ZERO",
-		ArgLen:    0,
-		ZeroWidth: true,
-		FixedReg:  true,
-		EarlyOk:   true,
-		Reg:       RegInfo{},
+		Name:          "ZERO",
+		ArgLen:        0,
+		ZeroWidth:     true,
+		FixedReg:      true,
+		EarlyOk:       true,
+		ZeroUpperBits: 56,
+		Reg:           RegInfo{},
 	},
 	{
 		Name:    "MOVWfpgp",
@@ -97936,10 +97944,11 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "MOVBUreg",
-		ArgLen:  1,
-		EarlyOk: true,
-		asm:     mips.AMOVBU,
+		Name:          "MOVBUreg",
+		ArgLen:        1,
+		EarlyOk:       true,
+		asm:           mips.AMOVBU,
+		ZeroUpperBits: 56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 234881022, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -97964,10 +97973,11 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "MOVHUreg",
-		ArgLen:  1,
-		EarlyOk: true,
-		asm:     mips.AMOVHU,
+		Name:          "MOVHUreg",
+		ArgLen:        1,
+		EarlyOk:       true,
+		asm:           mips.AMOVHU,
+		ZeroUpperBits: 48,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 234881022, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -97992,10 +98002,11 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "MOVWUreg",
-		ArgLen:  1,
-		EarlyOk: true,
-		asm:     mips.AMOVWU,
+		Name:          "MOVWUreg",
+		ArgLen:        1,
+		EarlyOk:       true,
+		asm:           mips.AMOVWU,
+		ZeroUpperBits: 32,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 234881022, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -98330,6 +98341,7 @@ var OpcodeTable = [...]OpInfo{
 		Name:           "LoweredAtomicLoad8",
 		ArgLen:         2,
 		FaultOnNilArg0: true,
+		ZeroUpperBits:  56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 1152921504875282430, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 SP g R31 SB
@@ -98343,6 +98355,7 @@ var OpcodeTable = [...]OpInfo{
 		Name:           "LoweredAtomicLoad32",
 		ArgLen:         2,
 		FaultOnNilArg0: true,
+		ZeroUpperBits:  32,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{0, RegMask{V1: 1152921504875282430, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 SP g R31 SB
@@ -98532,6 +98545,7 @@ var OpcodeTable = [...]OpInfo{
 		FaultOnNilArg0:  true,
 		HasSideEffects:  true,
 		unsafePoint:     true,
+		ZeroUpperBits:   56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{1, RegMask{V1: 234881022, V2: 0}},           // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -98550,6 +98564,7 @@ var OpcodeTable = [...]OpInfo{
 		FaultOnNilArg0:  true,
 		HasSideEffects:  true,
 		unsafePoint:     true,
+		ZeroUpperBits:   56,
 		Reg: RegInfo{
 			Inputs: []InputInfo{
 				{1, RegMask{V1: 234881022, V2: 0}},           // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 g R31
@@ -98573,9 +98588,10 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "FPFlagTrue",
-		ArgLen:  1,
-		EarlyOk: true,
+		Name:          "FPFlagTrue",
+		ArgLen:        1,
+		EarlyOk:       true,
+		ZeroUpperBits: 56,
 		Reg: RegInfo{
 			Outputs: []OutputInfo{
 				{0, RegMask{V1: 167772158, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 R31
@@ -98583,9 +98599,10 @@ var OpcodeTable = [...]OpInfo{
 		},
 	},
 	{
-		Name:    "FPFlagFalse",
-		ArgLen:  1,
-		EarlyOk: true,
+		Name:          "FPFlagFalse",
+		ArgLen:        1,
+		EarlyOk:       true,
+		ZeroUpperBits: 56,
 		Reg: RegInfo{
 			Outputs: []OutputInfo{
 				{0, RegMask{V1: 167772158, V2: 0}}, // R1 R2 R3 R4 R5 R6 R7 R8 R9 R10 R11 R12 R13 R14 R15 R16 R17 R18 R19 R20 R21 R22 R24 R25 R31
