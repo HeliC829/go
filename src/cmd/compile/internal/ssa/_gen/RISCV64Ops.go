@@ -187,13 +187,13 @@ func init() {
 		{name: "FMOVFconst", reg: fp01, asm: "MOVF", typ: "Float32", aux: "Float32", rematerializeable: true, earlyOk: true}, // auxint
 
 		// Loads: load <size> bits from arg0+auxint+aux and extend to 64 bits; arg1=mem
-		{name: "MOVBload", argLength: 2, reg: gpload, asm: "MOVB", aux: "SymOff", typ: "Int8", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},     //  8 bits, sign extend
-		{name: "MOVHload", argLength: 2, reg: gpload, asm: "MOVH", aux: "SymOff", typ: "Int16", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},    // 16 bits, sign extend
-		{name: "MOVWload", argLength: 2, reg: gpload, asm: "MOVW", aux: "SymOff", typ: "Int32", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},    // 32 bits, sign extend
-		{name: "MOVDload", argLength: 2, reg: gpload, asm: "MOV", aux: "SymOff", typ: "Int64", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},     // 64 bits
-		{name: "MOVBUload", argLength: 2, reg: gpload, asm: "MOVBU", aux: "SymOff", typ: "UInt8", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},  //  8 bits, zero extend
-		{name: "MOVHUload", argLength: 2, reg: gpload, asm: "MOVHU", aux: "SymOff", typ: "UInt16", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true}, // 16 bits, zero extend
-		{name: "MOVWUload", argLength: 2, reg: gpload, asm: "MOVWU", aux: "SymOff", typ: "UInt32", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true}, // 32 bits, zero extend
+		{name: "MOVBload", argLength: 2, reg: gpload, asm: "MOVB", aux: "SymOff", typ: "Int8", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},                        //  8 bits, sign extend
+		{name: "MOVHload", argLength: 2, reg: gpload, asm: "MOVH", aux: "SymOff", typ: "Int16", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},                       // 16 bits, sign extend
+		{name: "MOVWload", argLength: 2, reg: gpload, asm: "MOVW", aux: "SymOff", typ: "Int32", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},                       // 32 bits, sign extend
+		{name: "MOVDload", argLength: 2, reg: gpload, asm: "MOV", aux: "SymOff", typ: "Int64", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true},                        // 64 bits
+		{name: "MOVBUload", argLength: 2, reg: gpload, asm: "MOVBU", aux: "SymOff", typ: "UInt8", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true, zeroUpperBits: 56},  //  8 bits, zero extend
+		{name: "MOVHUload", argLength: 2, reg: gpload, asm: "MOVHU", aux: "SymOff", typ: "UInt16", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true, zeroUpperBits: 48}, // 16 bits, zero extend
+		{name: "MOVWUload", argLength: 2, reg: gpload, asm: "MOVWU", aux: "SymOff", typ: "UInt32", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true, zeroUpperBits: 32}, // 32 bits, zero extend
 
 		// Stores: store <size> lowest bits in arg1 to arg0+auxint+aux; arg2=mem
 		{name: "MOVBstore", argLength: 3, reg: gpstore, asm: "MOVB", aux: "SymOff", typ: "Mem", faultOnNilArg0: true, symEffect: "Write", addrSinkArg0: true}, //  8 bits
@@ -208,13 +208,13 @@ func init() {
 		{name: "MOVDstorezero", argLength: 2, reg: gpstore0, aux: "SymOff", asm: "MOV", typ: "Mem", faultOnNilArg0: true, symEffect: "Write", addrSinkArg0: true},  // 64 bits
 
 		// Conversions
-		{name: "MOVBreg", argLength: 1, reg: gp11, asm: "MOVB", earlyOk: true},   // move from arg0, sign-extended from byte
-		{name: "MOVHreg", argLength: 1, reg: gp11, asm: "MOVH", earlyOk: true},   // move from arg0, sign-extended from half
-		{name: "MOVWreg", argLength: 1, reg: gp11, asm: "MOVW", earlyOk: true},   // move from arg0, sign-extended from word
-		{name: "MOVDreg", argLength: 1, reg: gp11, asm: "MOV", earlyOk: true},    // move from arg0
-		{name: "MOVBUreg", argLength: 1, reg: gp11, asm: "MOVBU", earlyOk: true}, // move from arg0, unsign-extended from byte
-		{name: "MOVHUreg", argLength: 1, reg: gp11, asm: "MOVHU", earlyOk: true}, // move from arg0, unsign-extended from half
-		{name: "MOVWUreg", argLength: 1, reg: gp11, asm: "MOVWU", earlyOk: true}, // move from arg0, unsign-extended from word
+		{name: "MOVBreg", argLength: 1, reg: gp11, asm: "MOVB", earlyOk: true},                      // move from arg0, sign-extended from byte
+		{name: "MOVHreg", argLength: 1, reg: gp11, asm: "MOVH", earlyOk: true},                      // move from arg0, sign-extended from half
+		{name: "MOVWreg", argLength: 1, reg: gp11, asm: "MOVW", earlyOk: true},                      // move from arg0, sign-extended from word
+		{name: "MOVDreg", argLength: 1, reg: gp11, asm: "MOV", earlyOk: true},                       // move from arg0
+		{name: "MOVBUreg", argLength: 1, reg: gp11, asm: "MOVBU", earlyOk: true, zeroUpperBits: 56}, // move from arg0, unsign-extended from byte
+		{name: "MOVHUreg", argLength: 1, reg: gp11, asm: "MOVHU", earlyOk: true, zeroUpperBits: 48}, // move from arg0, unsign-extended from half
+		{name: "MOVWUreg", argLength: 1, reg: gp11, asm: "MOVWU", earlyOk: true, zeroUpperBits: 32}, // move from arg0, unsign-extended from word
 
 		{name: "MOVDnop", argLength: 1, reg: regInfo{inputs: []regMask{gpMask}, outputs: []regMask{gpMask}}, resultInArg0: true, earlyOk: true}, // nop, return arg0 in same register
 
@@ -242,12 +242,12 @@ func init() {
 		{name: "AND", argLength: 2, reg: gp21, asm: "AND", commutative: true, earlyOk: true},   // arg0 & arg1
 		{name: "ANDN", argLength: 2, reg: gp21, asm: "ANDN", earlyOk: true},                    // ^arg0 & arg1
 		{name: "ANDI", argLength: 1, reg: gp11, asm: "ANDI", aux: "Int64", earlyOk: true},      // arg0 & auxint
-		{name: "CLZ", argLength: 1, reg: gp11, asm: "CLZ", earlyOk: true},                      // count leading zeros
-		{name: "CLZW", argLength: 1, reg: gp11, asm: "CLZW", earlyOk: true},                    // count leading zeros of least significant word
-		{name: "CPOP", argLength: 1, reg: gp11, asm: "CPOP"},                                   // count set bits
-		{name: "CPOPW", argLength: 1, reg: gp11, asm: "CPOPW"},                                 // count set bits in least significant word
-		{name: "CTZ", argLength: 1, reg: gp11, asm: "CTZ", earlyOk: true},                      // count trailing zeros
-		{name: "CTZW", argLength: 1, reg: gp11, asm: "CTZW", earlyOk: true},                    // count trailing zeros of least significant word
+		{name: "CLZ", argLength: 1, reg: gp11, asm: "CLZ", earlyOk: true, zeroUpperBits: 56},   // count leading zeros (returns 0-64)
+		{name: "CLZW", argLength: 1, reg: gp11, asm: "CLZW", earlyOk: true, zeroUpperBits: 56}, // count leading zeros of least significant word (returns 0-32)
+		{name: "CPOP", argLength: 1, reg: gp11, asm: "CPOP", zeroUpperBits: 56},                // count set bits (returns 0-64)
+		{name: "CPOPW", argLength: 1, reg: gp11, asm: "CPOPW", zeroUpperBits: 56},              // count set bits in least significant word (returns 0-32)
+		{name: "CTZ", argLength: 1, reg: gp11, asm: "CTZ", earlyOk: true, zeroUpperBits: 56},   // count trailing zeros (returns 0-64)
+		{name: "CTZW", argLength: 1, reg: gp11, asm: "CTZW", earlyOk: true, zeroUpperBits: 56}, // count trailing zeros of least significant word (returns 0-32)
 		{name: "NOT", argLength: 1, reg: gp11, asm: "NOT", earlyOk: true},                      // ^arg0
 		{name: "OR", argLength: 2, reg: gp21, asm: "OR", commutative: true, earlyOk: true},     // arg0 | arg1
 		{name: "ORN", argLength: 2, reg: gp21, asm: "ORN", earlyOk: true},                      // ^arg0 | arg1
@@ -270,12 +270,12 @@ func init() {
 		{name: "MAXU", argLength: 2, reg: gp21, asm: "MAXU", commutative: true, earlyOk: true}, // max(arg0,arg1), unsigned
 
 		// Generate boolean values
-		{name: "SEQZ", argLength: 1, reg: gp11, asm: "SEQZ", earlyOk: true},                 // arg0 == 0, result is 0 or 1
-		{name: "SNEZ", argLength: 1, reg: gp11, asm: "SNEZ", earlyOk: true},                 // arg0 != 0, result is 0 or 1
-		{name: "SLT", argLength: 2, reg: gp21, asm: "SLT", earlyOk: true},                   // arg0 < arg1, result is 0 or 1
-		{name: "SLTI", argLength: 1, reg: gp11, asm: "SLTI", aux: "Int64", earlyOk: true},   // arg0 < auxint, result is 0 or 1
-		{name: "SLTU", argLength: 2, reg: gp21, asm: "SLTU", earlyOk: true},                 // arg0 < arg1, unsigned, result is 0 or 1
-		{name: "SLTIU", argLength: 1, reg: gp11, asm: "SLTIU", aux: "Int64", earlyOk: true}, // arg0 < auxint, unsigned, result is 0 or 1
+		{name: "SEQZ", argLength: 1, reg: gp11, asm: "SEQZ", earlyOk: true, zeroUpperBits: 56},                 // arg0 == 0, result is 0 or 1
+		{name: "SNEZ", argLength: 1, reg: gp11, asm: "SNEZ", earlyOk: true, zeroUpperBits: 56},                 // arg0 != 0, result is 0 or 1
+		{name: "SLT", argLength: 2, reg: gp21, asm: "SLT", earlyOk: true, zeroUpperBits: 56},                   // arg0 < arg1, result is 0 or 1
+		{name: "SLTI", argLength: 1, reg: gp11, asm: "SLTI", aux: "Int64", earlyOk: true, zeroUpperBits: 56},   // arg0 < auxint, result is 0 or 1
+		{name: "SLTU", argLength: 2, reg: gp21, asm: "SLTU", earlyOk: true, zeroUpperBits: 56},                 // arg0 < arg1, unsigned, result is 0 or 1
+		{name: "SLTIU", argLength: 1, reg: gp11, asm: "SLTIU", aux: "Int64", earlyOk: true, zeroUpperBits: 56}, // arg0 < auxint, unsigned, result is 0 or 1
 
 		// Round ops to block fused-multiply-add extraction.
 		{name: "LoweredRound32F", argLength: 1, reg: fp11, resultInArg0: true, earlyOk: true},
@@ -385,7 +385,7 @@ func init() {
 		// Atomic loads.
 		// load from arg0. arg1=mem.
 		// returns <value,memory> so they can be properly ordered with other loads.
-		{name: "LoweredAtomicLoad8", argLength: 2, reg: gpload, faultOnNilArg0: true},
+		{name: "LoweredAtomicLoad8", argLength: 2, reg: gpload, faultOnNilArg0: true, zeroUpperBits: 56},
 		{name: "LoweredAtomicLoad32", argLength: 2, reg: gpload, faultOnNilArg0: true},
 		{name: "LoweredAtomicLoad64", argLength: 2, reg: gpload, faultOnNilArg0: true},
 
@@ -419,8 +419,8 @@ func init() {
 		// SC	Rarg2, (Rarg0), Rtmp
 		// BNE	Rtmp, ZERO, -3(PC)
 		// MOV  $1, Rout
-		{name: "LoweredAtomicCas32", argLength: 4, reg: gpcas, resultNotInArgs: true, faultOnNilArg0: true, hasSideEffects: true, unsafePoint: true},
-		{name: "LoweredAtomicCas64", argLength: 4, reg: gpcas, resultNotInArgs: true, faultOnNilArg0: true, hasSideEffects: true, unsafePoint: true},
+		{name: "LoweredAtomicCas32", argLength: 4, reg: gpcas, resultNotInArgs: true, faultOnNilArg0: true, hasSideEffects: true, unsafePoint: true, zeroUpperBits: 56},
+		{name: "LoweredAtomicCas64", argLength: 4, reg: gpcas, resultNotInArgs: true, faultOnNilArg0: true, hasSideEffects: true, unsafePoint: true, zeroUpperBits: 56},
 
 		// Atomic 32 bit AND/OR.
 		// *arg0 &= (|=) arg1. arg2=mem. returns nil.
@@ -486,10 +486,10 @@ func init() {
 		{name: "FCVTLS", argLength: 1, reg: fpgp, asm: "FCVTLS", typ: "Int64", earlyOk: true},                                                                   // int64(arg0)
 		{name: "FMOVWload", argLength: 2, reg: fpload, asm: "MOVF", aux: "SymOff", typ: "Float32", faultOnNilArg0: true, symEffect: "Read", addrSinkArg0: true}, // load float32 from arg0+auxint+aux
 		{name: "FMOVWstore", argLength: 3, reg: fpstore, asm: "MOVF", aux: "SymOff", typ: "Mem", faultOnNilArg0: true, symEffect: "Write", addrSinkArg0: true},  // store float32 to arg0+auxint+aux
-		{name: "FEQS", argLength: 2, reg: fp2gp, asm: "FEQS", commutative: true, earlyOk: true},                                                                 // arg0 == arg1
-		{name: "FNES", argLength: 2, reg: fp2gp, asm: "FNES", commutative: true, earlyOk: true},                                                                 // arg0 != arg1
-		{name: "FLTS", argLength: 2, reg: fp2gp, asm: "FLTS", earlyOk: true},                                                                                    // arg0 < arg1
-		{name: "FLES", argLength: 2, reg: fp2gp, asm: "FLES", earlyOk: true},                                                                                    // arg0 <= arg1
+		{name: "FEQS", argLength: 2, reg: fp2gp, asm: "FEQS", commutative: true, earlyOk: true, zeroUpperBits: 56},                                              // arg0 == arg1, result is 0 or 1
+		{name: "FNES", argLength: 2, reg: fp2gp, asm: "FNES", commutative: true, earlyOk: true, zeroUpperBits: 56},                                              // arg0 != arg1, result is 0 or 1
+		{name: "FLTS", argLength: 2, reg: fp2gp, asm: "FLTS", earlyOk: true, zeroUpperBits: 56},                                                                 // arg0 < arg1, result is 0 or 1
+		{name: "FLES", argLength: 2, reg: fp2gp, asm: "FLES", earlyOk: true, zeroUpperBits: 56},                                                                 // arg0 <= arg1, result is 0 or 1
 		{name: "LoweredFMAXS", argLength: 2, reg: fp21, resultNotInArgs: true, asm: "FMAXS", commutative: true, typ: "Float32", earlyOk: true},                  // max(arg0, arg1)
 		{name: "LoweredFMINS", argLength: 2, reg: fp21, resultNotInArgs: true, asm: "FMINS", commutative: true, typ: "Float32", earlyOk: true},                  // min(arg0, arg1)
 
@@ -516,10 +516,10 @@ func init() {
 		{name: "FCVTSD", argLength: 1, reg: fp11, asm: "FCVTSD", typ: "Float32", earlyOk: true},                                                // float32(arg0)
 		{name: "FMOVDload", argLength: 2, reg: fpload, asm: "MOVD", aux: "SymOff", typ: "Float64", faultOnNilArg0: true, symEffect: "Read"},    // load float64 from arg0+auxint+aux
 		{name: "FMOVDstore", argLength: 3, reg: fpstore, asm: "MOVD", aux: "SymOff", typ: "Mem", faultOnNilArg0: true, symEffect: "Write"},     // store float6 to arg0+auxint+aux
-		{name: "FEQD", argLength: 2, reg: fp2gp, asm: "FEQD", commutative: true, earlyOk: true},                                                // arg0 == arg1
-		{name: "FNED", argLength: 2, reg: fp2gp, asm: "FNED", commutative: true, earlyOk: true},                                                // arg0 != arg1
-		{name: "FLTD", argLength: 2, reg: fp2gp, asm: "FLTD", earlyOk: true},                                                                   // arg0 < arg1
-		{name: "FLED", argLength: 2, reg: fp2gp, asm: "FLED", earlyOk: true},                                                                   // arg0 <= arg1
+		{name: "FEQD", argLength: 2, reg: fp2gp, asm: "FEQD", commutative: true, earlyOk: true, zeroUpperBits: 56},                             // arg0 == arg1, result is 0 or 1
+		{name: "FNED", argLength: 2, reg: fp2gp, asm: "FNED", commutative: true, earlyOk: true, zeroUpperBits: 56},                             // arg0 != arg1, result is 0 or 1
+		{name: "FLTD", argLength: 2, reg: fp2gp, asm: "FLTD", earlyOk: true, zeroUpperBits: 56},                                                // arg0 < arg1, result is 0 or 1
+		{name: "FLED", argLength: 2, reg: fp2gp, asm: "FLED", earlyOk: true, zeroUpperBits: 56},                                                // arg0 <= arg1, result is 0 or 1
 		{name: "LoweredFMIND", argLength: 2, reg: fp21, resultNotInArgs: true, asm: "FMIND", commutative: true, typ: "Float64", earlyOk: true}, // min(arg0, arg1)
 		{name: "LoweredFMAXD", argLength: 2, reg: fp21, resultNotInArgs: true, asm: "FMAXD", commutative: true, typ: "Float64", earlyOk: true}, // max(arg0, arg1)
 
@@ -547,8 +547,8 @@ func init() {
 		//     8 | qNaN
 		//     9 | sNaN
 		//   ====+=============================
-		{name: "FCLASSS", argLength: 1, reg: fpgp, asm: "FCLASSS", typ: "Int64", earlyOk: true}, // classify float32
-		{name: "FCLASSD", argLength: 1, reg: fpgp, asm: "FCLASSD", typ: "Int64", earlyOk: true}, // classify float64
+		{name: "FCLASSS", argLength: 1, reg: fpgp, asm: "FCLASSS", typ: "Int64", earlyOk: true, zeroUpperBits: 48}, // classify float32
+		{name: "FCLASSD", argLength: 1, reg: fpgp, asm: "FCLASSD", typ: "Int64", earlyOk: true, zeroUpperBits: 48}, // classify float64
 
 		// RISC-V Integer Conditional (Zicond) operations extension
 		{name: "CZEROEQZ", argLength: 2, reg: gp21, asm: "CZEROEQZ"}, // arg1 == 0 result is 0, else arg0

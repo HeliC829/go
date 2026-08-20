@@ -23,3 +23,8 @@
 (SRAI [0] x) => x
 (SRLI [0] x) => x
 (SLLI [0] x) => x
+
+// omit unsigned extension
+(MOVBUreg x) && ssa.ZeroUpper56Bits(x) => x
+(MOVHUreg x) && ssa.ZeroUpper48Bits(x) => x
+(MOVWUreg x) && ssa.ZeroUpper32Bits(x) => x
