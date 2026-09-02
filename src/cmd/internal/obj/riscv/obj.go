@@ -782,9 +782,10 @@ func preprocess(ctxt *obj.Link, cursym *obj.LSym, newprog obj.ProgAlloc) {
 
 		case AAUIPC:
 			if p.From.Type == obj.TYPE_BRANCH {
-				low, high, err := Split32BitImmediate(p.From.Target().Pc - p.Pc)
+				offset := p.From.Target().Pc - p.Pc
+				low, high, err := Split32BitImmediate(offset)
 				if err != nil {
-					ctxt.Diag("%v: jump displacement %d too large", p, p.To.Target().Pc-p.Pc)
+					ctxt.Diag("%v: jump displacement %d too large", p, offset)
 				}
 				p.From = obj.Addr{Type: obj.TYPE_CONST, Offset: high, Sym: cursym}
 				p.Link.To.Offset = low
