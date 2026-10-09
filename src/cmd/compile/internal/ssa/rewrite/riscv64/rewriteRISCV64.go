@@ -2643,12 +2643,12 @@ func rewriteValue_OpMax64(v *ssa.Value) bool {
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
 	// match: (Max64 x y)
-	// cond: buildcfg.GORISCV64 >= 22
+	// cond: buildcfg.GORISCV64.Version >= 22
 	// result: (MAX x y)
 	for {
 		x := v_0
 		y := v_1
-		if !(buildcfg.GORISCV64 >= 22) {
+		if !(buildcfg.GORISCV64.Version >= 22) {
 			break
 		}
 		v.Reset(ssaop.OpRISCV64MAX)
@@ -2661,12 +2661,12 @@ func rewriteValue_OpMax64u(v *ssa.Value) bool {
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
 	// match: (Max64u x y)
-	// cond: buildcfg.GORISCV64 >= 22
+	// cond: buildcfg.GORISCV64.Version >= 22
 	// result: (MAXU x y)
 	for {
 		x := v_0
 		y := v_1
-		if !(buildcfg.GORISCV64 >= 22) {
+		if !(buildcfg.GORISCV64.Version >= 22) {
 			break
 		}
 		v.Reset(ssaop.OpRISCV64MAXU)
@@ -2679,12 +2679,12 @@ func rewriteValue_OpMin64(v *ssa.Value) bool {
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
 	// match: (Min64 x y)
-	// cond: buildcfg.GORISCV64 >= 22
+	// cond: buildcfg.GORISCV64.Version >= 22
 	// result: (MIN x y)
 	for {
 		x := v_0
 		y := v_1
-		if !(buildcfg.GORISCV64 >= 22) {
+		if !(buildcfg.GORISCV64.Version >= 22) {
 			break
 		}
 		v.Reset(ssaop.OpRISCV64MIN)
@@ -2697,12 +2697,12 @@ func rewriteValue_OpMin64u(v *ssa.Value) bool {
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
 	// match: (Min64u x y)
-	// cond: buildcfg.GORISCV64 >= 22
+	// cond: buildcfg.GORISCV64.Version >= 22
 	// result: (MINU x y)
 	for {
 		x := v_0
 		y := v_1
-		if !(buildcfg.GORISCV64 >= 22) {
+		if !(buildcfg.GORISCV64.Version >= 22) {
 			break
 		}
 		v.Reset(ssaop.OpRISCV64MINU)
@@ -3374,7 +3374,7 @@ func rewriteValue_OpRISCV64ADD(v *ssa.Value) bool {
 		break
 	}
 	// match: (ADD (SLLI [1] x) y)
-	// cond: buildcfg.GORISCV64 >= 22
+	// cond: buildcfg.GORISCV64.Version >= 22
 	// result: (SH1ADD x y)
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -3383,7 +3383,7 @@ func rewriteValue_OpRISCV64ADD(v *ssa.Value) bool {
 			}
 			x := v_0.Args[0]
 			y := v_1
-			if !(buildcfg.GORISCV64 >= 22) {
+			if !(buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SH1ADD)
@@ -3393,7 +3393,7 @@ func rewriteValue_OpRISCV64ADD(v *ssa.Value) bool {
 		break
 	}
 	// match: (ADD (SLLI [2] x) y)
-	// cond: buildcfg.GORISCV64 >= 22
+	// cond: buildcfg.GORISCV64.Version >= 22
 	// result: (SH2ADD x y)
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -3402,7 +3402,7 @@ func rewriteValue_OpRISCV64ADD(v *ssa.Value) bool {
 			}
 			x := v_0.Args[0]
 			y := v_1
-			if !(buildcfg.GORISCV64 >= 22) {
+			if !(buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SH2ADD)
@@ -3412,7 +3412,7 @@ func rewriteValue_OpRISCV64ADD(v *ssa.Value) bool {
 		break
 	}
 	// match: (ADD (SLLI [3] x) y)
-	// cond: buildcfg.GORISCV64 >= 22
+	// cond: buildcfg.GORISCV64.Version >= 22
 	// result: (SH3ADD x y)
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -3421,7 +3421,7 @@ func rewriteValue_OpRISCV64ADD(v *ssa.Value) bool {
 			}
 			x := v_0.Args[0]
 			y := v_1
-			if !(buildcfg.GORISCV64 >= 22) {
+			if !(buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SH3ADD)
@@ -7120,7 +7120,7 @@ func rewriteValue_OpRISCV64MUL(v *ssa.Value) bool {
 	v_0 := v.Args[0]
 	b := v.Block
 	// match: (MUL x (MOVDconst [c]))
-	// cond: c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64 >= 22
+	// cond: c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64.Version >= 22
 	// result: (SLLI [ssa.Log64(c/3)] (SH1ADD <x.Type> x x))
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -7129,7 +7129,7 @@ func rewriteValue_OpRISCV64MUL(v *ssa.Value) bool {
 				continue
 			}
 			c := ssa.AuxIntToInt64(v_1.AuxInt)
-			if !(c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64 >= 22) {
+			if !(c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SLLI)
@@ -7142,7 +7142,7 @@ func rewriteValue_OpRISCV64MUL(v *ssa.Value) bool {
 		break
 	}
 	// match: (MUL x (MOVDconst [c]))
-	// cond: c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64 >= 22
+	// cond: c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64.Version >= 22
 	// result: (SLLI [ssa.Log64(c/5)] (SH2ADD <x.Type> x x))
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -7151,7 +7151,7 @@ func rewriteValue_OpRISCV64MUL(v *ssa.Value) bool {
 				continue
 			}
 			c := ssa.AuxIntToInt64(v_1.AuxInt)
-			if !(c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64 >= 22) {
+			if !(c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SLLI)
@@ -7164,7 +7164,7 @@ func rewriteValue_OpRISCV64MUL(v *ssa.Value) bool {
 		break
 	}
 	// match: (MUL x (MOVDconst [c]))
-	// cond: c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64 >= 22
+	// cond: c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64.Version >= 22
 	// result: (SLLI [ssa.Log64(c/9)] (SH3ADD <x.Type> x x))
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -7173,7 +7173,7 @@ func rewriteValue_OpRISCV64MUL(v *ssa.Value) bool {
 				continue
 			}
 			c := ssa.AuxIntToInt64(v_1.AuxInt)
-			if !(c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64 >= 22) {
+			if !(c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SLLI)
@@ -7192,7 +7192,7 @@ func rewriteValue_OpRISCV64MULW(v *ssa.Value) bool {
 	v_0 := v.Args[0]
 	b := v.Block
 	// match: (MULW x (MOVDconst [c]))
-	// cond: c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64 >= 22
+	// cond: c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64.Version >= 22
 	// result: (SLLIW [ssa.Log64(c/3)] (SH1ADD <x.Type> x x))
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -7201,7 +7201,7 @@ func rewriteValue_OpRISCV64MULW(v *ssa.Value) bool {
 				continue
 			}
 			c := ssa.AuxIntToInt64(v_1.AuxInt)
-			if !(c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64 >= 22) {
+			if !(c%3 == 0 && ssa.IsPowerOfTwo(c/3) && buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SLLIW)
@@ -7214,7 +7214,7 @@ func rewriteValue_OpRISCV64MULW(v *ssa.Value) bool {
 		break
 	}
 	// match: (MULW x (MOVDconst [c]))
-	// cond: c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64 >= 22
+	// cond: c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64.Version >= 22
 	// result: (SLLIW [ssa.Log64(c/5)] (SH2ADD <x.Type> x x))
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -7223,7 +7223,7 @@ func rewriteValue_OpRISCV64MULW(v *ssa.Value) bool {
 				continue
 			}
 			c := ssa.AuxIntToInt64(v_1.AuxInt)
-			if !(c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64 >= 22) {
+			if !(c%5 == 0 && ssa.IsPowerOfTwo(c/5) && buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SLLIW)
@@ -7236,7 +7236,7 @@ func rewriteValue_OpRISCV64MULW(v *ssa.Value) bool {
 		break
 	}
 	// match: (MULW x (MOVDconst [c]))
-	// cond: c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64 >= 22
+	// cond: c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64.Version >= 22
 	// result: (SLLIW [ssa.Log64(c/9)] (SH3ADD <x.Type> x x))
 	for {
 		for _i0 := 0; _i0 <= 1; _i0, v_0, v_1 = _i0+1, v_1, v_0 {
@@ -7245,7 +7245,7 @@ func rewriteValue_OpRISCV64MULW(v *ssa.Value) bool {
 				continue
 			}
 			c := ssa.AuxIntToInt64(v_1.AuxInt)
-			if !(c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64 >= 22) {
+			if !(c%9 == 0 && ssa.IsPowerOfTwo(c/9) && buildcfg.GORISCV64.Version >= 22) {
 				continue
 			}
 			v.Reset(ssaop.OpRISCV64SLLIW)

@@ -718,6 +718,8 @@ Architecture-specific environment variables:
 		to compile. Valid values are rva20u64 (default), rva22u64, rva23u64.
 		See https://github.com/riscv/riscv-profiles/blob/main/src/profiles.adoc
 		and https://github.com/riscv/riscv-profiles/blob/main/src/rva23-profile.adoc
+		The value can be followed by options specifying optimization guidance for target hardware.
+		Valid options are ,oilsm and ,ovlt.
 	GOWASM
 		For GOARCH=wasm, comma-separated list of experimental WebAssembly features to use.
 		Valid values are satconv, signext.
@@ -1027,6 +1029,8 @@ The defined architecture feature build tags are:
 	- For GOARCH=riscv64,
 	  GORISCV64=rva20u64, rva22u64 and rva23u64 correspond to the riscv64.rva20u64,
 	  riscv64.rva22u64 and riscv64.rva23u64 build tags.
+	  GORISCV64=...,oilsm and ,ovlt correspond to the riscv64.oilsm and riscv64.ovlt
+	  feature build tags.
 	- For GOARCH=wasm, GOWASM=satconv and signext
 	  correspond to the wasm.satconv and wasm.signext feature build tags.
 

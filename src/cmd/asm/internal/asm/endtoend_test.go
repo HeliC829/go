@@ -509,11 +509,11 @@ func TestPPC64EndToEnd(t *testing.T) {
 func testRISCV64AllProfiles(t *testing.T, testFn func(t *testing.T)) {
 	t.Helper()
 
-	defer func(orig int) { buildcfg.GORISCV64 = orig }(buildcfg.GORISCV64)
+	defer func(orig buildcfg.Goriscv64Features) { buildcfg.GORISCV64 = orig }(buildcfg.GORISCV64)
 
 	for _, goriscv64 := range []int{20, 22, 23} {
 		t.Run(fmt.Sprintf("rva%vu64", goriscv64), func(t *testing.T) {
-			buildcfg.GORISCV64 = goriscv64
+			buildcfg.GORISCV64.Version = goriscv64
 			testFn(t)
 		})
 	}

@@ -316,22 +316,63 @@ func goppc64() int {
 	return int(DefaultGOPPC64[len("power")] - '0')
 }
 
-func goriscv64() int {
-	switch v := envOr("GORISCV64", DefaultGORISCV64); v {
-	case "rva20u64":
-		return 20
-	case "rva22u64":
-		return 22
-	case "rva23u64":
-		return 23
+type Goriscv64Features struct {
+	// RVA profile year, e.g. 22 for rva22u64
+	Version int
+	// Fast misaligned loads and stores
+	Oilsm bool
+	// Vector execution time depends on vl, not VLMAX
+	Ovlt bool
+}
+
+func (g Goriscv64Features) String() string {
+	riscv64Str := fmt.Sprintf("rva%du64", g.Version)
+	if g.Oilsm {
+		riscv64Str += ",oilsm"
 	}
-	Error = fmt.Errorf("invalid GORISCV64: must be rva20u64, rva22u64, rva23u64")
-	v := DefaultGORISCV64[len("rva"):]
-	i := strings.IndexFunc(v, func(r rune) bool {
-		return r < '0' || r > '9'
-	})
-	year, _ := strconv.Atoi(v[:i])
-	return year
+	if g.Ovlt {
+		riscv64Str += ",ovlt"
+	}
+	return riscv64Str
+}
+
+func ParseGoriscv64(v string) (g Goriscv64Features, e error) {
+	const (
+		oilsmOpt = ",oilsm"
+		ovltOpt  = ",ovlt"
+	)
+	opts := []string{oilsmOpt, ovltOpt}
+
+	// We allow any combination of suffixes, in any order
+	v, found := cutOptions(v, opts...)
+	g.Oilsm = found[oilsmOpt]
+	g.Ovlt = found[ovltOpt]
+
+	switch v {
+	case "rva20u64":
+		g.Version = 20
+	case "rva22u64":
+		g.Version = 22
+	case "rva23u64":
+		g.Version = 23
+	default:
+		e = fmt.Errorf("invalid GORISCV64: must start with rva20u64, rva22u64 or rva23u64 and may optionally end in any of %q", opts)
+		def := DefaultGORISCV64[len("rva"):]
+		i := strings.IndexFunc(def, func(r rune) bool {
+			return r < '0' || r > '9'
+		})
+		g.Version, _ = strconv.Atoi(def[:i])
+	}
+
+	return
+}
+
+func goriscv64() Goriscv64Features {
+	g, err := ParseGoriscv64(envOr("GORISCV64", DefaultGORISCV64))
+	if err != nil {
+		Error = err
+	}
+	return g
 }
 
 type gowasmFeatures struct {
@@ -409,7 +450,7 @@ func GOGOARCH() (name, value string) {
 	case "ppc64", "ppc64le":
 		return "GOPPC64", fmt.Sprintf("power%d", GOPPC64)
 	case "riscv64":
-		return "GORISCV64", fmt.Sprintf("rva%du64", GORISCV64)
+		return "GORISCV64", GORISCV64.String()
 	case "wasm":
 		return "GOWASM", GOWASM.String()
 	}
@@ -458,11 +499,17 @@ func gogoarchTags() []string {
 		return list
 	case "riscv64":
 		list := []string{GOARCH + "." + "rva20u64"}
-		if GORISCV64 >= 22 {
+		if GORISCV64.Version >= 22 {
 			list = append(list, GOARCH+"."+"rva22u64")
 		}
-		if GORISCV64 >= 23 {
+		if GORISCV64.Version >= 23 {
 			list = append(list, GOARCH+"."+"rva23u64")
+		}
+		if GORISCV64.Oilsm {
+			list = append(list, GOARCH+"."+"oilsm")
+		}
+		if GORISCV64.Ovlt {
+			list = append(list, GOARCH+"."+"ovlt")
 		}
 		return list
 	case "wasm":

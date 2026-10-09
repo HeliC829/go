@@ -416,8 +416,17 @@ func asmArgs(a *Action, p *load.Package) []any {
 	}
 
 	if cfg.Goarch == "riscv64" {
-		// Define GORISCV64_value from cfg.GORISCV64.
-		args = append(args, "-D", "GORISCV64_"+cfg.GORISCV64)
+		// Define GORISCV64_value and GORISCV64_option from cfg.GORISCV64.
+		g, err := buildcfg.ParseGoriscv64(cfg.GORISCV64)
+		if err == nil {
+			args = append(args, "-D", fmt.Sprintf("GORISCV64_rva%du64", g.Version))
+			if g.Oilsm {
+				args = append(args, "-D", "GORISCV64_oilsm")
+			}
+			if g.Ovlt {
+				args = append(args, "-D", "GORISCV64_ovlt")
+			}
+		}
 	}
 
 	if cfg.Goarch == "arm" {
