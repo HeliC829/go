@@ -4118,7 +4118,7 @@ func instructionsForMOVConst(p *obj.Prog) []*instruction {
 	if err := immIFits(ins.imm, 32); err != nil {
 		if c, lsh, rsh, ok := splitShiftConst(ins.imm); ok {
 			ins.imm = c
-			if buildcfg.GORISCV64 >= 22 && lsh == 32 && rsh == 32 {
+			if buildcfg.GORISCV64.Version >= 22 && lsh == 32 && rsh == 32 {
 				insMOVWU = &instruction{as: AADDUW, rd: ins.rd, rs1: ins.rd, rs2: REG_ZERO}
 				lsh, rsh = 0, 0
 			}
@@ -4223,7 +4223,7 @@ func instructionsForMOV(p *obj.Prog) []*instruction {
 				ins.as, ins.rs1 = AFSGNJD, uint32(p.From.Reg)
 			}
 		case AMOVB, AMOVH:
-			if buildcfg.GORISCV64 >= 22 {
+			if buildcfg.GORISCV64.Version >= 22 {
 				// Use SEXTB or SEXTH to extend.
 				ins.as, ins.rs1, ins.rs2 = ASEXTB, uint32(p.From.Reg), obj.REG_NONE
 				if p.As == AMOVH {
@@ -4241,7 +4241,7 @@ func instructionsForMOV(p *obj.Prog) []*instruction {
 				inss = append(inss, ins2)
 			}
 		case AMOVHU, AMOVWU:
-			if buildcfg.GORISCV64 >= 22 {
+			if buildcfg.GORISCV64.Version >= 22 {
 				// Use ZEXTH or ADDUW to extend.
 				ins.as, ins.rs1, ins.rs2, ins.imm = AZEXTH, uint32(p.From.Reg), obj.REG_NONE, 0
 				if p.As == AMOVWU {
@@ -4363,7 +4363,7 @@ func instructionsForMOV(p *obj.Prog) []*instruction {
 
 // instructionsForRotate returns the machine instructions for a bitwise rotation.
 func instructionsForRotate(p *obj.Prog, ins *instruction) []*instruction {
-	if buildcfg.GORISCV64 >= 22 {
+	if buildcfg.GORISCV64.Version >= 22 {
 		// Rotation instructions are supported natively.
 		return []*instruction{ins}
 	}
@@ -4409,7 +4409,7 @@ func instructionsForRotate(p *obj.Prog, ins *instruction) []*instruction {
 
 // instructionsForMinMax returns the machine instructions for an integer minimum or maximum.
 func instructionsForMinMax(p *obj.Prog, ins *instruction) []*instruction {
-	if buildcfg.GORISCV64 >= 22 {
+	if buildcfg.GORISCV64.Version >= 22 {
 		// Minimum and maximum instructions are supported natively.
 		return []*instruction{ins}
 	}
@@ -4786,7 +4786,7 @@ func instructionsForProg(p *obj.Prog, compress bool) []*instruction {
 		ins.rd, ins.rs1, ins.rs2 = uint32(p.To.Reg), uint32(p.From.Reg), obj.REG_NONE
 
 	case AANDN, AORN:
-		if buildcfg.GORISCV64 >= 22 {
+		if buildcfg.GORISCV64.Version >= 22 {
 			// ANDN and ORN instructions are supported natively.
 			break
 		}
@@ -4805,7 +4805,7 @@ func instructionsForProg(p *obj.Prog, compress bool) []*instruction {
 		}
 
 	case AXNOR:
-		if buildcfg.GORISCV64 >= 22 {
+		if buildcfg.GORISCV64.Version >= 22 {
 			// XNOR instruction is supported natively.
 			break
 		}

@@ -4368,7 +4368,7 @@ func (s *state) minMax(n *ir.CallExpr) *ssa.Value {
 	}
 
 	if typ.IsInteger() {
-		if Arch.LinkArch.Family == sys.RISCV64 && buildcfg.GORISCV64 >= 22 && typ.Size() == 8 {
+		if Arch.LinkArch.Family == sys.RISCV64 && buildcfg.GORISCV64.Version >= 22 && typ.Size() == 8 {
 			var op ssaop.Op
 			switch {
 			case typ.IsSigned() && n.Op() == ir.OMIN:

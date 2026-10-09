@@ -105,7 +105,7 @@ func initIntrinsics(cfg *intrinsicBuildConfig) {
 			gomips:        buildcfg.GOMIPS,
 			gomips64:      buildcfg.GOMIPS64,
 			goppc64:       buildcfg.GOPPC64,
-			goriscv64:     buildcfg.GORISCV64,
+			goriscv64:     buildcfg.GORISCV64.Version,
 		}
 	}
 	intrinsics = intrinsicBuilders{}
