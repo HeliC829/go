@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -157,16 +158,9 @@ func goarm() (g GoarmFeatures) {
 	}
 	v := envOr("GOARM", def)
 
-	floatSpecified := false
-	if strings.HasSuffix(v, softFloatOpt) {
-		g.SoftFloat = true
-		floatSpecified = true
-		v = v[:len(v)-len(softFloatOpt)]
-	}
-	if strings.HasSuffix(v, hardFloatOpt) {
-		floatSpecified = true
-		v = v[:len(v)-len(hardFloatOpt)]
-	}
+	v, found := cutOptions(v, softFloatOpt, hardFloatOpt)
+	g.SoftFloat = found[softFloatOpt]
+	floatSpecified := found[softFloatOpt] || found[hardFloatOpt]
 
 	switch v {
 	case "5":
@@ -185,6 +179,23 @@ func goarm() (g GoarmFeatures) {
 		g.SoftFloat = true
 	}
 	return
+}
+
+// cutOptions splits v, such as "v8.0,lse", into a base value and options.
+// If any option is not in opts, it returns v unchanged for the caller to reject.
+func cutOptions(v string, opts ...string) (string, map[string]bool) {
+	base, rest, ok := strings.Cut(v, ",")
+	if !ok {
+		return v, nil
+	}
+	found := make(map[string]bool)
+	for opt := range strings.SplitSeq(rest, ",") {
+		if !slices.Contains(opts, ","+opt) {
+			return v, nil
+		}
+		found[","+opt] = true
+	}
+	return base, found
 }
 
 type Goarm64Features struct {
@@ -216,24 +227,10 @@ func ParseGoarm64(v string) (g Goarm64Features, e error) {
 		cryptoOpt = ",crypto"
 	)
 
-	g.LSE = false
-	g.Crypto = false
 	// We allow any combination of suffixes, in any order
-	for {
-		if strings.HasSuffix(v, lseOpt) {
-			g.LSE = true
-			v = v[:len(v)-len(lseOpt)]
-			continue
-		}
-
-		if strings.HasSuffix(v, cryptoOpt) {
-			g.Crypto = true
-			v = v[:len(v)-len(cryptoOpt)]
-			continue
-		}
-
-		break
-	}
+	v, found := cutOptions(v, lseOpt, cryptoOpt)
+	g.LSE = found[lseOpt]
+	g.Crypto = found[cryptoOpt]
 
 	switch v {
 	case "v8.0":
