@@ -83,6 +83,7 @@ type symsStruct struct {
 	Loong64HasLASX       *obj.LSym
 	RISCV64HasV          *obj.LSym
 	RISCV64HasZbb        *obj.LSym
+	RISCV64HasZfa        *obj.LSym
 	X86HasAVX            *obj.LSym
 	X86HasFMA            *obj.LSym
 	X86HasPOPCNT         *obj.LSym

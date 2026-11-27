@@ -309,6 +309,7 @@ var loong64HasDBAR_HINTS bool
 var loong64HasLSX bool
 var loong64HasLASX bool
 var riscv64HasZbb bool
+var riscv64HasZfa bool
 
 func asanregisterglobals(unsafe.Pointer, uintptr)
 

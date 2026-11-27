@@ -173,6 +173,7 @@ var RISCV64 struct {
 	HasV              bool // Vector extension compatible with RVV 1.0
 	HasZbb            bool // Basic bit-manipulation extension
 	HasZbc            bool // Carryless multiplication extension
+	HasZfa            bool // Additional floating-point instructions
 	HasZvbb           bool // Vector Basic Bit-manipulation
 	HasZvbc           bool // Vector Carryless Multiplication
 	HasZvkg           bool // Vector GCM/GMAC

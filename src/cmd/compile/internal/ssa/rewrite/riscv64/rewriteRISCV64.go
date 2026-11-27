@@ -7,6 +7,7 @@ import "math"
 import "math/bits"
 import "cmd/compile/internal/types"
 import "cmd/compile/internal/ssa/block"
+import "cmd/internal/obj/riscv"
 import "cmd/compile/internal/ssa/ssaop"
 import "cmd/compile/internal/ssa"
 
@@ -133,6 +134,8 @@ func RewriteValue(v *ssa.Value) bool {
 	case ssaop.OpBswap64:
 		v.Op = ssaop.OpRISCV64REV8
 		return true
+	case ssaop.OpCeil:
+		return rewriteValue_OpCeil(v)
 	case ssaop.OpClosureCall:
 		v.Op = ssaop.OpRISCV64CALLclosure
 		return true
@@ -274,6 +277,8 @@ func RewriteValue(v *ssa.Value) bool {
 	case ssaop.OpFMA32:
 		v.Op = ssaop.OpRISCV64FMADDS
 		return true
+	case ssaop.OpFloor:
+		return rewriteValue_OpFloor(v)
 	case ssaop.OpGetCallerPC:
 		v.Op = ssaop.OpRISCV64LoweredGetCallerPC
 		return true
@@ -698,12 +703,16 @@ func RewriteValue(v *ssa.Value) bool {
 		return true
 	case ssaop.OpRotateLeft8:
 		return rewriteValue_OpRotateLeft8(v)
+	case ssaop.OpRound:
+		return rewriteValue_OpRound(v)
 	case ssaop.OpRound32F:
 		v.Op = ssaop.OpRISCV64LoweredRound32F
 		return true
 	case ssaop.OpRound64F:
 		v.Op = ssaop.OpRISCV64LoweredRound64F
 		return true
+	case ssaop.OpRoundToEven:
+		return rewriteValue_OpRoundToEven(v)
 	case ssaop.OpRsh16Ux16:
 		return rewriteValue_OpRsh16Ux16(v)
 	case ssaop.OpRsh16Ux32:
@@ -830,6 +839,8 @@ func RewriteValue(v *ssa.Value) bool {
 	case ssaop.OpTailCallInter:
 		v.Op = ssaop.OpRISCV64CALLtailinter
 		return true
+	case ssaop.OpTrunc:
+		return rewriteValue_OpTrunc(v)
 	case ssaop.OpTrunc16to8:
 		v.Op = ssaop.OpCopy
 		return true
@@ -1109,6 +1120,18 @@ func rewriteValue_OpBswap32(v *ssa.Value) bool {
 		v0 := b.NewValue0(v.Pos, ssaop.OpRISCV64REV8, t)
 		v0.AddArg(x)
 		v.AddArg(v0)
+		return true
+	}
+}
+func rewriteValue_OpCeil(v *ssa.Value) bool {
+	v_0 := v.Args[0]
+	// match: (Ceil x)
+	// result: (FROUNDD [int8(riscv.RM_RUP)] x)
+	for {
+		x := v_0
+		v.Reset(ssaop.OpRISCV64FROUNDD)
+		v.AuxInt = ssa.Int8ToAuxInt(int8(riscv.RM_RUP))
+		v.AddArg(x)
 		return true
 	}
 }
@@ -1481,6 +1504,18 @@ func rewriteValue_OpEqPtr(v *ssa.Value) bool {
 		v0 := b.NewValue0(v.Pos, ssaop.OpRISCV64SUB, typ.Uintptr)
 		v0.AddArg2(x, y)
 		v.AddArg(v0)
+		return true
+	}
+}
+func rewriteValue_OpFloor(v *ssa.Value) bool {
+	v_0 := v.Args[0]
+	// match: (Floor x)
+	// result: (FROUNDD [int8(riscv.RM_RDN)] x)
+	for {
+		x := v_0
+		v.Reset(ssaop.OpRISCV64FROUNDD)
+		v.AuxInt = ssa.Int8ToAuxInt(int8(riscv.RM_RDN))
+		v.AddArg(x)
 		return true
 	}
 }
@@ -9464,6 +9499,30 @@ func rewriteValue_OpRotateLeft8(v *ssa.Value) bool {
 		return true
 	}
 }
+func rewriteValue_OpRound(v *ssa.Value) bool {
+	v_0 := v.Args[0]
+	// match: (Round x)
+	// result: (FROUNDD [int8(riscv.RM_RMM)] x)
+	for {
+		x := v_0
+		v.Reset(ssaop.OpRISCV64FROUNDD)
+		v.AuxInt = ssa.Int8ToAuxInt(int8(riscv.RM_RMM))
+		v.AddArg(x)
+		return true
+	}
+}
+func rewriteValue_OpRoundToEven(v *ssa.Value) bool {
+	v_0 := v.Args[0]
+	// match: (RoundToEven x)
+	// result: (FROUNDD [int8(riscv.RM_RNE)] x)
+	for {
+		x := v_0
+		v.Reset(ssaop.OpRISCV64FROUNDD)
+		v.AuxInt = ssa.Int8ToAuxInt(int8(riscv.RM_RNE))
+		v.AddArg(x)
+		return true
+	}
+}
 func rewriteValue_OpRsh16Ux16(v *ssa.Value) bool {
 	v_1 := v.Args[1]
 	v_0 := v.Args[0]
@@ -11145,6 +11204,18 @@ func rewriteValue_OpStore(v *ssa.Value) bool {
 		return true
 	}
 	return false
+}
+func rewriteValue_OpTrunc(v *ssa.Value) bool {
+	v_0 := v.Args[0]
+	// match: (Trunc x)
+	// result: (FROUNDD [int8(riscv.RM_RTZ)] x)
+	for {
+		x := v_0
+		v.Reset(ssaop.OpRISCV64FROUNDD)
+		v.AuxInt = ssa.Int8ToAuxInt(int8(riscv.RM_RTZ))
+		v.AddArg(x)
+		return true
+	}
 }
 func rewriteValue_OpZero(v *ssa.Value) bool {
 	v_1 := v.Args[1]

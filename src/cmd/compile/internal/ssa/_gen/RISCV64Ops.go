@@ -546,6 +546,9 @@ func init() {
 		{name: "LoweredCeilD", argLength: 1, reg: fp11, resultNotInArgs: true, typ: "Float64"},        // round float64 toward +Inf
 		{name: "LoweredTruncD", argLength: 1, reg: fp11, resultNotInArgs: true, typ: "Float64"},       // round float64 toward zero
 
+		// Not earlyOk: it may be guarded by a runtime check for Zfa support.
+		{name: "FROUNDD", argLength: 1, reg: fp11, asm: "FROUNDD", aux: "Int8", typ: "Float64"},
+
 		// Floating point classify (in the F and D extensions).
 		//
 		// The FCLASS instructions will always set exactly one bit in the output
@@ -597,6 +600,7 @@ func init() {
 		name:            "RISCV64",
 		pkg:             "cmd/internal/obj/riscv",
 		genfile:         "../../riscv64/ssa.go",
+		imports:         []string{"cmd/internal/obj/riscv"},
 		ops:             RISCV64ops,
 		blocks:          RISCV64blocks,
 		regnames:        regNamesRISCV64,

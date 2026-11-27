@@ -69,6 +69,12 @@
 
 (Abs ...) => (FABSD ...)
 
+(RoundToEven x) => (FROUNDD [int8(riscv.RM_RNE)] x)
+(Round       x) => (FROUNDD [int8(riscv.RM_RMM)] x)
+(Floor       x) => (FROUNDD [int8(riscv.RM_RDN)] x)
+(Ceil        x) => (FROUNDD [int8(riscv.RM_RUP)] x)
+(Trunc       x) => (FROUNDD [int8(riscv.RM_RTZ)] x)
+
 (FMA ...) => (FMADDD ...)
 (FMA32 ...) => (FMADDS ...)
 

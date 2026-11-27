@@ -808,6 +808,7 @@ func cpuinit(env string) {
 	case "riscv64":
 		riscv64HasV = cpu.RISCV64.HasV
 		riscv64HasZbb = cpu.RISCV64.HasZbb
+		riscv64HasZfa = cpu.RISCV64.HasZfa
 	}
 
 	xRegInitCPU()

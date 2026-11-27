@@ -49,4 +49,5 @@ var (
 
 	riscv64HasV   bool
 	riscv64HasZbb bool
+	riscv64HasZfa bool
 )

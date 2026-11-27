@@ -189,6 +189,7 @@ func InitConfig(config *ssa.Config) {
 	ir.Syms.Loong64HasLASX = typecheck.LookupRuntimeVar("loong64HasLASX")             // bool
 	ir.Syms.RISCV64HasV = typecheck.LookupRuntimeVar("riscv64HasV")                   // bool
 	ir.Syms.RISCV64HasZbb = typecheck.LookupRuntimeVar("riscv64HasZbb")               // bool
+	ir.Syms.RISCV64HasZfa = typecheck.LookupRuntimeVar("riscv64HasZfa")               // bool
 	ir.Syms.Staticuint64s = typecheck.LookupRuntimeVar("staticuint64s")
 	ir.Syms.Typedmemmove = typecheck.LookupRuntimeFunc("typedmemmove")
 	ir.Syms.Udiv = typecheck.LookupRuntimeVar("udiv")                 // asm func with special ABI

@@ -36,6 +36,7 @@ const (
 	riscv_HWPROBE_EXT_ZVKSED      = 0x1000000
 	riscv_HWPROBE_EXT_ZVKSH       = 0x2000000
 	riscv_HWPROBE_EXT_ZVKT        = 0x4000000
+	riscv_HWPROBE_EXT_ZFA         = 0x100000000
 	riscv_HWPROBE_KEY_CPUPERF_0   = 0x5
 	riscv_HWPROBE_MISALIGNED_FAST = 0x3
 	riscv_HWPROBE_MISALIGNED_MASK = 0x7
@@ -71,6 +72,7 @@ func osInit() {
 		RISCV64.HasV = isSet(v, riscv_HWPROBE_IMA_V)
 		RISCV64.HasZbb = isSet(v, riscv_HWPROBE_EXT_ZBB)
 		RISCV64.HasZbc = isSet(v, riscv_HWPROBE_EXT_ZBC)
+		RISCV64.HasZfa = isSet(v, riscv_HWPROBE_EXT_ZFA)
 		RISCV64.HasZvbb = isSet(v, riscv_HWPROBE_EXT_ZVBB)
 		RISCV64.HasZvbc = isSet(v, riscv_HWPROBE_EXT_ZVBC)
 		RISCV64.HasZvkg = isSet(v, riscv_HWPROBE_EXT_ZVKG)

@@ -235,6 +235,7 @@ var builtins = [...]struct {
 	{"runtime.loong64HasLSX", 0},
 	{"runtime.loong64HasLASX", 0},
 	{"runtime.riscv64HasZbb", 0},
+	{"runtime.riscv64HasZfa", 0},
 	{"runtime.asanregisterglobals", 1},
 	{"runtime.KeepAlive", 1},
 	{"runtime.deferproc", 1},

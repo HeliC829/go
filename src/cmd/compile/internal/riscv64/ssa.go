@@ -371,6 +371,14 @@ func ssaGenValue(s *ssagen.State, v *ssa.Value) {
 		p3.To.SetTarget(nop)
 		p5.To.SetTarget(nop)
 
+	case ssaop.OpRISCV64FROUNDD:
+		p := s.Prog(v.Op.Asm())
+		p.Scond = riscv.RoundingModeSuffix(uint8(v.AuxInt))
+		p.From.Type = obj.TYPE_REG
+		p.From.Reg = v.Args[0].Reg()
+		p.To.Type = obj.TYPE_REG
+		p.To.Reg = v.Reg()
+
 	case ssaop.OpRISCV64LoweredRoundToEvenD, ssaop.OpRISCV64LoweredRoundD, ssaop.OpRISCV64LoweredFloorD, ssaop.OpRISCV64LoweredCeilD, ssaop.OpRISCV64LoweredTruncD:
 		rm := riscv.RM_RNE
 		switch v.Op {

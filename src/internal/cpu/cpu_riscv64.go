@@ -29,9 +29,10 @@ func doinit() {
 		options = append(options, option{Name: "zbb", Feature: &RISCV64.HasZbb})
 	}
 	if level < 23 {
-		// V, Zvbb and Zvkt are mandatory for rva23u64 and higher.
+		// V, Zfa, Zvbb and Zvkt are mandatory for rva23u64 and higher.
 		options = append(options,
 			option{Name: "v", Feature: &RISCV64.HasV},
+			option{Name: "zfa", Feature: &RISCV64.HasZfa},
 			option{Name: "zvbb", Feature: &RISCV64.HasZvbb},
 			option{Name: "zvkt", Feature: &RISCV64.HasZvkt},
 		)

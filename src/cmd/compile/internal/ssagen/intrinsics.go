@@ -956,20 +956,43 @@ func initIntrinsics(cfg *intrinsicBuildConfig) {
 		makeRoundLoong64(ssaop.OpTrunc),
 		sys.Loong64)
 
-	makeRoundRISCV64 := func(op ssaop.Op) func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+	makeRoundRISCV64 := func(zfaOp, op ssaop.Op) func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
 		return func(s *state, n *ir.CallExpr, args []*ssa.Value) *ssa.Value {
+			if cfg.goriscv64 >= 23 {
+				// Zfa is mandatory for rva23u64 and higher, so FROUND.D
+				// can be used unconditionally.
+				return s.newValue1(zfaOp, types.Types[types.TFLOAT64], args[0])
+			}
+
+			bEnd := s.f.NewBlock(block.BlockPlain)
+
+			// Use FROUND.D if Zfa is available at runtime.
+			addr := s.entryNewValue1A(ssaop.OpAddr, types.Types[types.TBOOL].PtrTo(), ir.Syms.RISCV64HasZfa, s.sb)
+			hasZfa := s.load(types.Types[types.TBOOL], addr)
+			b := s.endBlock()
+			b.Kind = block.BlockIf
+			b.SetControl(hasZfa)
+			bZfa := s.f.NewBlock(block.BlockPlain)
+			bNoZfa := s.f.NewBlock(block.BlockPlain)
+			b.AddEdgeTo(bZfa)
+			b.AddEdgeTo(bNoZfa)
+
+			s.startBlock(bZfa)
+			s.vars[n] = s.newValue1(zfaOp, types.Types[types.TFLOAT64], args[0])
+			s.endBlock().AddEdgeTo(bEnd)
+
 			// FCVT.L.D only gives the right result while the rounded value fits
 			// in int64. For larger finite values, infinities, and NaNs, these
 			// operations return x unchanged.
+			s.startBlock(bNoZfa)
 			abs := s.newValue1(ssaop.OpAbs, types.Types[types.TFLOAT64], args[0])
 			limit := s.constFloat64(types.Types[types.TFLOAT64], float64(1<<52))
 			inRange := s.newValue2(ssaop.OpLess64F, types.Types[types.TBOOL], abs, limit)
-			b := s.endBlock()
+			b = s.endBlock()
 			b.Kind = block.BlockIf
 			b.SetControl(inRange)
 			bTrue := s.f.NewBlock(block.BlockPlain)
 			bFalse := s.f.NewBlock(block.BlockPlain)
-			bEnd := s.f.NewBlock(block.BlockPlain)
 			b.AddEdgeTo(bTrue)
 			b.AddEdgeTo(bFalse)
 			b.Likely = ssa.BranchLikely
@@ -987,19 +1010,19 @@ func initIntrinsics(cfg *intrinsicBuildConfig) {
 		}
 	}
 	addF("math", "RoundToEven",
-		makeRoundRISCV64(ssaop.OpRISCV64LoweredRoundToEvenD),
+		makeRoundRISCV64(ssaop.OpRoundToEven, ssaop.OpRISCV64LoweredRoundToEvenD),
 		sys.RISCV64)
 	addF("math", "Round",
-		makeRoundRISCV64(ssaop.OpRISCV64LoweredRoundD),
+		makeRoundRISCV64(ssaop.OpRound, ssaop.OpRISCV64LoweredRoundD),
 		sys.RISCV64)
 	addF("math", "Floor",
-		makeRoundRISCV64(ssaop.OpRISCV64LoweredFloorD),
+		makeRoundRISCV64(ssaop.OpFloor, ssaop.OpRISCV64LoweredFloorD),
 		sys.RISCV64)
 	addF("math", "Ceil",
-		makeRoundRISCV64(ssaop.OpRISCV64LoweredCeilD),
+		makeRoundRISCV64(ssaop.OpCeil, ssaop.OpRISCV64LoweredCeilD),
 		sys.RISCV64)
 	addF("math", "Trunc",
-		makeRoundRISCV64(ssaop.OpRISCV64LoweredTruncD),
+		makeRoundRISCV64(ssaop.OpTrunc, ssaop.OpRISCV64LoweredTruncD),
 		sys.RISCV64)
 
 	/******** math/bits ********/

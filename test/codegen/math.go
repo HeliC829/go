@@ -16,7 +16,9 @@ func approx(x float64) {
 	// s390x:"FIDBR [$]6"
 	// arm64:"FRINTPD"
 	// ppc64x:"FRIP"
-	// riscv64:"FCVTLD\\.RUP" "FCVTDL" "FSGNJD"
+	// riscv64/rva20u64:".*riscv64HasZfa" "FROUNDD\\.RUP" "FCVTLD\\.RUP" "FCVTDL" "FSGNJD"
+	// riscv64/rva22u64:".*riscv64HasZfa" "FROUNDD\\.RUP" "FCVTLD\\.RUP" "FCVTDL" "FSGNJD"
+	// riscv64/rva23u64:"FROUNDD\\.RUP" -".*riscv64HasZfa" -"FCVTLD"
 	// wasm:"F64Ceil"
 	sink64[0] = math.Ceil(x)
 
@@ -25,14 +27,18 @@ func approx(x float64) {
 	// s390x:"FIDBR [$]7"
 	// arm64:"FRINTMD"
 	// ppc64x:"FRIM"
-	// riscv64:"FCVTLD\\.RDN" "FCVTDL" "FSGNJD"
+	// riscv64/rva20u64:"FROUNDD\\.RDN" "FCVTLD\\.RDN" "FCVTDL" "FSGNJD"
+	// riscv64/rva22u64:"FROUNDD\\.RDN" "FCVTLD\\.RDN" "FCVTDL" "FSGNJD"
+	// riscv64/rva23u64:"FROUNDD\\.RDN" -".*riscv64HasZfa" -"FCVTLD"
 	// wasm:"F64Floor"
 	sink64[1] = math.Floor(x)
 
 	// s390x:"FIDBR [$]1"
 	// arm64:"FRINTAD"
 	// ppc64x:"FRIN"
-	// riscv64:"FCVTLD\\.RMM" "FCVTDL" "FSGNJD"
+	// riscv64/rva20u64:"FROUNDD\\.RMM" "FCVTLD\\.RMM" "FCVTDL" "FSGNJD"
+	// riscv64/rva22u64:"FROUNDD\\.RMM" "FCVTLD\\.RMM" "FCVTDL" "FSGNJD"
+	// riscv64/rva23u64:"FROUNDD\\.RMM" -".*riscv64HasZfa" -"FCVTLD"
 	sink64[2] = math.Round(x)
 
 	// amd64/v2:-".*x86HasSSE41" amd64/v3:-".*x86HasSSE41"
@@ -40,7 +46,9 @@ func approx(x float64) {
 	// s390x:"FIDBR [$]5"
 	// arm64:"FRINTZD"
 	// ppc64x:"FRIZ"
-	// riscv64:"FCVTLD\\.RTZ" "FCVTDL" "FSGNJD"
+	// riscv64/rva20u64:"FROUNDD\\.RTZ" "FCVTLD\\.RTZ" "FCVTDL" "FSGNJD"
+	// riscv64/rva22u64:"FROUNDD\\.RTZ" "FCVTLD\\.RTZ" "FCVTDL" "FSGNJD"
+	// riscv64/rva23u64:"FROUNDD\\.RTZ" -".*riscv64HasZfa" -"FCVTLD"
 	// wasm:"F64Trunc"
 	sink64[3] = math.Trunc(x)
 
@@ -48,7 +56,9 @@ func approx(x float64) {
 	// amd64:"ROUNDSD [$]0"
 	// s390x:"FIDBR [$]4"
 	// arm64:"FRINTND"
-	// riscv64:"FCVTLD\\.RNE" "FCVTDL" "FSGNJD"
+	// riscv64/rva20u64:"FROUNDD\\.RNE" "FCVTLD\\.RNE" "FCVTDL" "FSGNJD"
+	// riscv64/rva22u64:"FROUNDD\\.RNE" "FCVTLD\\.RNE" "FCVTDL" "FSGNJD"
+	// riscv64/rva23u64:"FROUNDD\\.RNE" -".*riscv64HasZfa" -"FCVTLD"
 	// wasm:"F64Nearest"
 	sink64[4] = math.RoundToEven(x)
 }
